@@ -1,0 +1,35 @@
+.contact-form-body
+{
+  margin: 0;
+  font-family: -apple-system, Lucida, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  padding: 30px;
+  padding-bottom: 10px;
+  border: 2px solid #80DB53;
+  border-radius: 0.25rem;
+  max-width: 100%;
+}
+
+.contact-button
+{
+  display: inline-block;
+  font-weight: 400;
+  color: #80DB53;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  background-color: transparent;
+  border: 1px solid #80DB53;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
