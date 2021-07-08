@@ -145,12 +145,12 @@ function power(type, source, desc)
   powerUpTypes.push(this)
 }
 
-const eggplant        = new power("Big Dick Energy"   , "images/OpenMoji/eggplant.png"          , "Get 50% more swole. Smack enemies to death on contact.")
-const moneyEyes       = new power("Cash Money"        , "images/OpenMoji/money_eyes.png"        , "DOUBLE SCORE.")
-const explodingFace   = new power("explodingFace"     , "images/OpenMoji/exploding_face.png"    , null)
-const frozenFace      = new power("The Big Freeze"    , "images/OpenMoji/frozen_face.png"       , "You're as cold as ice.")
-const headInTheClouds = new power("Head in the Clouds", "images/OpenMoji/head_in_the_clouds.png", "Enemies turn into cowards.")
-const pinch           = new power("pinch"             , "images/OpenMoji/pinch.png"             , null)
+const eggplant        = new power("Big Dick Energy"   , "./images/OpenMoji/eggplant.png"          , "Get 50% more swole. Smack enemies to death on contact.")
+const moneyEyes       = new power("Cash Money"        , "./images/OpenMoji/money_eyes.png"        , "DOUBLE SCORE.")
+const explodingFace   = new power("explodingFace"     , "./images/OpenMoji/exploding_face.png"    , null)
+const frozenFace      = new power("The Big Freeze"    , "./images/OpenMoji/frozen_face.png"       , "You're as cold as ice.")
+const headInTheClouds = new power("Head in the Clouds", "./images/OpenMoji/head_in_the_clouds.png", "Enemies turn into cowards.")
+const pinch           = new power("pinch"             , "./images/OpenMoji/pinch.png"             , null)
 //const smilingDevil    = new power("Machine Gun"       , "images/OpenMoji/smiling_devil.png"     , "BrrrRRrrRRrrRRRR")
 
 //const moneyWings = "images/OpenMoji/smiling_devil.png"
