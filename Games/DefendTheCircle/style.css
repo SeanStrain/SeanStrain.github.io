@@ -28,6 +28,8 @@ h1
 body
 {
   background-color: black;
+  margin: 0;
+  overflow: hidden;
 }
 
 .rotate {
