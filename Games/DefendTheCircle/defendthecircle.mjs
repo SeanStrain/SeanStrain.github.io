@@ -1,28 +1,20 @@
-import * as draw   from "./Drawable.mjs"
 import * as colour from "./Colour.mjs"
 
-// canvas constants:
-const canvas = document.querySelector('canvas')
-const ctx    = canvas.getContext('2d')
+const particleGenRate = 400
+const shootColour     = new colour.HSLObject(0, 100, 50)
 
-canvas.width  = innerWidth
-canvas.height = innerHeight
-const midx   = canvas.width  / 2
-const midy   = canvas.height / 2
+var friction  = 1 // modifies enemy speed
+var direction = 1 // modifies enemy direction
 
-// canvas element arrays:
-const projectiles = []
-const enemies     = []
-const particles   = []
+export function setFriction(value)
+{
+  friction = value
+}
 
-// movement values:
-const maxSpeed   = 2      // fastest player can go
-const friction   = 0.98   // coefficient of friction on movement
-const deltaV     = 0.1    // change in value of speed with keypress
-const smokePoint = 0.5    // speed at which smoke appears from player
-const keys     = []
-var speedX = 0
-var speedY = 0
+export function setEnemyDirection(value)
+{
+  direction = value
+}
 
 function velocity(angle, speed)
 {
@@ -32,238 +24,326 @@ function velocity(angle, speed)
   this.speed = speed
 }
 
-const shootColour  = new colour.HSLObject(0, 100, 50)
-const playerColour = new colour.HSLObject(0, 0, 100)
-const canvasColour = new colour.HSLObject(0, 5, 5)
-
-function spliceOneClean(array, index)
+export class Drawable
 {
-  setTimeout(() => {
-    array.splice(index, 1)
-  }, 0)
+  constructor (x, y, radius, colour, canvas, type, velocity, alpha)
+  {
+    this.x = x
+    this.y = y
+    this.radius = radius
+    this.colour = colour
+    this.type = type
+    this.canvas = canvas
+
+    if (typeof alpha === 'undefined')
+    {
+      this.alpha = 1;
+    } else {
+      this.alpha = alpha
+    }
+
+    if (typeof velocity === 'undefined')
+    {
+      this.velocity = 0;
+    } else {
+      this.velocity = velocity
+    }
+  }
+
+  draw()
+  {
+    this.canvas.ctx.save()
+    this.canvas.ctx.globalAlpha = this.alpha
+    this.canvas.ctx.beginPath()
+    this.canvas.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+    this.canvas.ctx.fillStyle = this.colour.hsl
+    this.canvas.ctx.fill()
+    this.canvas.ctx.restore()
+  }
+
+  move(rateX, rateY)
+  {
+    this.x += rateX
+    this.y += rateY
+  }
+
 }
 
-const player  = new draw.Player(midx, midy, 30, playerColour)
-const reticle = new draw.Reticle(midx, midy,  5, playerColour)
-
-// projectile spawner on clicks:
-addEventListener('click', (event) =>
+export class Player extends Drawable
 {
-  const angle = Math.atan2(event.clientY - player.y, event.clientX - player.x)
-  const proj  = new draw.Projectile(player.x, player.y, 5, shootColour, new velocity(angle, Math.random()+3))
-  projectiles.push(proj)
-})
-
-// mousemove:
-addEventListener('mousemove', (event) =>
-{
-  reticle.x = event.clientX
-  reticle.y = event.clientY
-})
-
-/*
-addEventListener('keydown', (event) =>
-{
-  var changeX = 0
-  var changeY = 0
-  var valid = false
-
-    enemies.forEach((enemy) =>
-    {
-      enemy.x += changeX
-      enemy.y += changeY
-    })
-    projectiles.forEach((projectile) =>
-    {
-      projectile.x += changeX
-      projectile.y += changeY
-    })
-    particles.forEach((particle) =>
-    {
-      particle.x += changeX
-      particle.y += changeY
-    })
-
-  if (valid)
+  constructor (x, y, radius, colour, canvas)
   {
-    const particle = player.spawnParticle(changeX, changeY)
-    if (particle != null ) {
-      particles.push(particle)
+    super(x, y, radius, colour, canvas, "player")
+    this.velocity   = new velocity(0 , 0)
+    this.powered    = false
+    this.unkillable = false
+    this.scoreMulti = 1
+    this.killAll    = false
+    this.maxSpeed   = 2
+    this.spread     = 0.1
+    this.baseColour = colour
+    this.particleColour = colour
+  }
+
+  spawnParticle(changeX, changeY)
+  {
+    if (Math.random() < 0.7)
+    {
+      const partx = this.x + changeX*10
+      const party = this.y + changeY*10
+      const partr = this.radius/2
+      const partc = new colour.HSLObject(this.particleColour.hue, this.particleColour.sat, this.particleColour.light)
+      const particle = new Particle(partx, party, partr, partc, this.canvas, this.velocity, 0.2, particleGenRate/1.5, this, 1)
+      return particle
     }
-  }
-})
-*/
-
-addEventListener('keydown', (event) =>
-{
-  keys[event.code] = true
-})
-
-addEventListener('keyup', (event) =>
-{
-  keys[event.code] = false
-})
-
-let animationId
-function animate()
-{
-  animationId = requestAnimationFrame(animate)
-
-  ctx.fillStyle = canvasColour.hsl
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  player.draw()
-
-
-  // Player Movement:
-  if ((keys["KeyW"] || keys["ArrowUp"]) && speedY < maxSpeed)
-  {
-    speedY += deltaV
+    else return null
   }
 
-  if ((keys["KeyD"] || keys["ArrowRight"]) && speedX > -maxSpeed)
+  machineGun(timeFrame, canvas)
   {
-    speedX -= deltaV
-  }
-
-  if ((keys["KeyS"] || keys["ArrowDown"]) && speedY > -maxSpeed)
-  {
-    speedY -= deltaV
-  }
-
-  if ((keys["KeyA"] || keys["ArrowLeft"]) && speedX < maxSpeed)
-  {
-    speedX += deltaV
-  }
-
-  speedX *= friction
-  speedY *= friction
-
-  if (Math.abs(speedX) > smokePoint || Math.abs(speedY) > smokePoint)
-  {
-    const particle = player.spawnParticle(speedX, speedY)
-    if (particle != null) particles.push(particle)
-  }
-
-  // particle loop:
-  particles.forEach((particle, index) =>
-  {
-    particle.move(speedX, speedY)
-    particle.update()
-    if (particle.ttl >= particle.life || particle.alpha <= 0)
+    let timer = 0
+    let interval = setInterval(() =>
     {
-      spliceOneClean(particles, index)
-    }
-  })
+      timer += 150
+      canvas.shoot()
+      if( timer >= timeFrame) { clearInterval(interval) }
+    }, 150)
 
-  // projectile loop:
-  projectiles.forEach((projectile, index) =>
+  }
+
+  shoot(x, y)
   {
-    projectile.move(speedX, speedY)
-    const particle = projectile.update()
-    if (particle != null) { particles.push(particle) }
+    var rand = (Math.random() - 0.5) * this.spread
+    var angle = Math.atan2(y - this.y, x - this.x)
+    var proj  = new Projectile(this.x, this.y, 5, shootColour, this.canvas, new velocity(angle + rand, Math.random()+4))
+    return proj
+  }
 
-    if (projectile.x + projectile.radius < 0 ||
-        projectile.x - projectile.radius > canvas.width ||
-        projectile.y + projectile.radius < 0 ||
-        projectile.y - projectile.radius > canvas.height)
-    {
-      spliceOneClean(projectiles, index)
-    }
-  })
-
-  // enemy loop:
-  enemies.forEach((enemy, indexEnemy) =>
+  setParticleColour(c)
   {
-    enemy.move(speedX, speedY)
-    const particle = enemy.update()
-    if (particle != null) { particles.push(particle) }
+    var c = new colour.HSLObject(c.hue, c.sat, c.light)
+    this.particleColour = c
+  }
 
-    if (enemy.x + enemy.radius < 0 ||
-        enemy.x - enemy.radius > canvas.width ||
-        enemy.y + enemy.radius < 0 ||
-        enemy.y - enemy.radius > canvas.height)
+  resetParticleColour()
+  {
+    var c = new colour.HSLObject(this.baseColour.hue, this.baseColour.sat, this.baseColour.light)
+    this.setParticleColour(c)
+  }
+
+  hitEnemy()
+  {
+    this.radius += 0.1
+  }
+
+  setFriction(value)
+  {
+    this.friction = value
+  }
+
+  update()
+  {
+
+  }
+
+  rainbow(timeFrame)
+  {
+    let timer   = 0
+    let intTime = 50
+    let interval = setInterval(() =>
     {
-      enemy.timeOffScreen += 1
-      console.log(enemy.timeOffScreen)
+      timer += intTime
+      if (timer >= timeFrame)
+      {
+        clearInterval(interval)
+        while(this.colour.light < 100) { this.colour.editLight(0.25) }
+      }
+
+      this.colour.editHue(8)
+      if (this.colour.light > 50) { this.colour.editLight(-2) }
+      this.setParticleColour(this.colour)
+    }, intTime)
+  }
+}
+
+export class Reticle extends Drawable
+{
+  constructor (x, y, radius, colour, canvas)
+  {
+    super(x, y, radius, colour, canvas, "reticle")
+  }
+  draw()
+  {
+    this.canvas.ctx.save()
+    this.canvas.ctx.globalAlpha = this.alpha
+    this.canvas.ctx.beginPath()
+    this.canvas.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2)
+    this.canvas.ctx.lineWidth = 3
+    this.canvas.ctx.strokeStyle = '#FF0000';
+    this.canvas.ctx.stroke()
+    this.canvas.ctx.restore()
+  }
+
+}
+
+export class Enemy extends Drawable
+{
+  constructor (x, y, radius, colour, canvas, player)
+  {
+    super(x, y, radius, colour, canvas, "enemy")
+    this.speed = Math.random() + 1.5
+    this.particleRadius = this.radius / 2
+    this.player = player
+    this.timeOffScreen = 0
+  }
+
+  update()
+  {
+    this.draw()
+    const angle = Math.atan2(this.player.y - this.y, this.player.x - this.x)
+    this.velocity = new velocity(angle, this.speed * friction)
+    const particle = this.spawnParticle()
+    this.x = this.x + (this.velocity.x * direction)
+    this.y = this.y + (this.velocity.y * direction)
+    return particle
+  }
+
+  explode(projectile, kill)
+  {
+    var particles = []
+    let amount
+    let x
+    let y
+    let scoreChange = 0
+
+    if (typeof kill === 'undefined') { kill = false }
+    if (typeof projectile === 'undefined')
+    {
+      x = this.x
+      y = this.y
     }
     else
     {
-      enemy.timeOffScreen = 0
+      x = projectile.x
+      y = projectile.y
     }
-    if (enemy.timeOffScreen > 250)
+
+    if (this.radius > 20)
     {
-      spliceOneClean(enemies, indexEnemy)
+      gsap.to(this, {
+        radius: this.radius - 10
+      })
+      scoreChange += 10
     }
-
-
-    const dist = Math.hypot(player.x - enemy.x, player.y - enemy.y)
-    // end game:
-    if (dist - enemy.radius - player.radius < 0)
+    else
     {
-      cancelAnimationFrame(animationId)
+      kill = true
+      gsap.to(this, {
+        radius: 0
+      })
+      scoreChange += this.radius
     }
 
-    // kill enemies:
-    projectiles.forEach((projectile, indexProj) =>
+    if (kill) { amount = 2 }
+    else      { amount = 1 }
+
+    for (let i = 0; i < Math.round(this.radius / 2); i++)
     {
-      const dist = Math.hypot(projectile.x - enemy.x, projectile.y - enemy.y)
-
-      //Enemy has been hit:
-      if (dist - enemy.radius - projectile.radius < 1)
-      {
-        spliceOneClean(projectiles, indexProj)
-        const explodeParticles = enemy.hit(projectile)
-        explodeParticles.forEach((explodeParticle) => { particles.push(explodeParticle) });
-
-        if (enemy.radius > 20)
-        {
-            enemy.radius -= 10
-        } else
-        {
-          spliceOneClean(enemies, indexEnemy)
-        }
-      }
-    })
-  })
-  reticle.draw()
-}
-
-function spawnEnemies()
-{
-  setInterval(() => {
-    const r = Math.random() * (40 - 10) + 10
-
-    let x
-    let y
-
-    if (Math.random() < 0.5) {
-      x = Math.random() < 0.5 ? 0 - r : canvas.width  + r
-      y = Math.random() * canvas.height
+      let angle
+      const partx = x + Math.random() * 10
+      const party = y + Math.random() * 10
+      if (kill)   { angle = Math.random() * Math.PI * 2 }
+      else        { angle = Math.atan2(party - this.y, partx - this.x) }
+      const partv = new velocity(angle, amount * (Math.random() * amount * 5))
+      const partc = new colour.HSLObject(this.colour.hue, this.colour.sat, this.colour.light)
+      const partLife = (particleGenRate / 10)
+      const particle = new Particle(partx, party, this.particleRadius / 2, partc, this.canvas, partv, 1, partLife, this, 10)
+      particles.push(particle)
     }
-    else {
-      x = Math.random() * canvas.width
-      y = Math.random() < 0.5 ? 0 - r : canvas.height + r
-    }
+  return [particles, scoreChange, kill]
+  }
 
-    const hue = Math.random() * 360
-    const c = new colour.HSLObject(hue, 50, 50)
-
-    const enemy = new draw.Enemy(x, y, r, c, player)
-    enemies.push(enemy)
-
-  }, 1250)
-}
-
-/*
-function canvasHueChange()
-{
-  setInterval(() =>
+  spawnParticle()
   {
-    canvasColour.editHue(1)
-    console.log("change")
-  }, 500)
+    if (Math.random() < 0.4)
+    {
+      const partx = this.x - this.velocity.x * this.radius
+      const party = this.y - this.velocity.y * this.radius
+      const partc = new colour.HSLObject(this.colour.hue, this.colour.sat, this.colour.light)
+      const partLife = (particleGenRate / 2.3)
+      const particle = new Particle(partx, party, this.particleRadius, partc, this.canvas, this.velocity, 0.1, partLife, this, 1)
+      return particle
+    }
+    else return null
+  }
 }
-canvasHueChange()
-*/
-animate()
-spawnEnemies()
+
+export class Projectile extends Drawable
+{
+  constructor (x, y, radius, colour, canvas, velocity)
+  {
+    super(x, y, radius, colour, canvas, "projectile", velocity)
+    this.life = 0
+    this.partr = radius - radius / 5
+    this.particles = []
+    this.ttl = 600
+    this.alpha = 1
+    this.minAlpha = this.alpha / this.ttl
+  }
+  update()
+  {
+    if (this.life > 100)
+    {
+      this.velocity.x *= 1 - (this.life/100000)
+      this.velocity.y *= 1 - (this.life/100000)
+    }
+    this.life += 1
+    this.draw()
+    if (this.alpha > this.minAlpha) { this.alpha -= this.minAlpha }
+    const particle = this.spawnParticle()
+    this.x = this.x + this.velocity.x
+    this.y = this.y + this.velocity.y
+    return particle
+  }
+
+  spawnParticle()
+  {
+    if (Math.random() < 0.8*this.alpha && this.life > 12)
+    {
+      const partx = this.x - this.velocity.x * 3
+      const party = this.y - this.velocity.y * 3
+      const partc = new colour.HSLObject(this.colour.hue, this.colour.sat, this.colour.light)
+      const particle = new Particle(partx, party, this.partr, partc, this.canvas, this.velocity, 0.2*this.alpha, particleGenRate / 8, this, 1)
+      return particle
+    }
+    else return null
+  }
+
+}
+
+export class Particle extends Drawable
+{
+  constructor (x, y, radius, colour, canvas, velocity, alpha, life, parent, spread)
+  {
+    radius += (Math.random() - 0.5) * 5
+    super(x, y, radius, colour, canvas, "particle", velocity, alpha)
+    this.ttl = 0
+    this.life = life
+    this.minAlpha = alpha / life
+    this.parent = parent
+    this.sprayx = (Math.random() - 0.5) / 3 * spread
+    this.sprayy = (Math.random() - 0.5) / 3 * spread
+  }
+
+  update()
+  {
+    this.velocity.speed
+    this.ttl += 1
+    this.draw()
+    this.radius
+    if( this.ttl % 5 == 0) { this.colour.editHue(1 + Math.random() * 1.5) }
+    if (this.alpha > this.minAlpha) { this.alpha -= this.minAlpha }
+    this.x = this.x + this.velocity.x / 3 + this.sprayx
+    this.y = this.y + this.velocity.y / 3 + this.sprayy
+  }
+}

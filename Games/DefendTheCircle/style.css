@@ -1,0 +1,44 @@
+span
+{
+  color: white;
+  font-size: 4rem;
+  font-family: Century Gothic, sans-serif;
+}
+
+.stat
+{
+  font-size: 2rem;
+}
+
+.power
+{
+  font-size: 3.5rem;
+}
+
+.powerDesc
+{
+  font-size: 2rem;
+}
+
+h1
+{
+
+}
+
+body
+{
+  background-color: black;
+}
+
+.rotate {
+  animation: rotation 2s infinite linear;
+}
+
+@keyframes rotation {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
