@@ -25,8 +25,8 @@ In this component of my Computer Graphics course I had to composite a real-world
 [The original photo](/Images/composite-original_scene.JPG) of the scene before compositing.
 
 
-<img src="/Images/composite-composite.jpg" alt="composited image" width="350"/>
-[The composited image](/Images/composite-composite.jpg) after compositing.
+<img src="/Images/composite-composite.png" alt="composited image" width="350"/>
+[The composited image](/Images/composite-composite.png) after compositing.
 
 For a more in-depth dive into the process I took in creating this final image, I made a full, step-by-step report:
 [PDF](/Files/Compositing_Report.pdf)
