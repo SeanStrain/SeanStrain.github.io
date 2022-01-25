@@ -6,4 +6,4 @@ Please, take a look around!
 
 ---
 
-### [Contact Me](https://seanstrain.github.io/contactme "My Games") | [Games](https://seanstrain.github.io/games "My Games") | [University Projects](https://seanstrain.github.io/universityprojects "My University Projects") | [External Links](https://seanstrain.github.io/externallinks "External Links") | [Certificates](https://seanstrain.github.io/certificates "My Certificates") | [Challenge Me at Chess!](https://lichess.org/@/hangshispawns)
+### [Contact Me](https://seanstrain.github.io/contactme "Contact Me") | [Games](https://seanstrain.github.io/games "My Games") | [Portfolio](https://seanstrain.github.io/portfolio "My Portfolio") | [External Links](https://seanstrain.github.io/externallinks "External Links") | [Certificates](https://seanstrain.github.io/certificates "My Certificates") | [Challenge Me at Chess!](https://lichess.org/@/hangshispawns)
