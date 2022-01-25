@@ -1,8 +1,7 @@
+<link href="Stylesheets/contact.css" rel="stylesheet">
 # Contact Me
 
 If you would like to get in touch about receiving my CV or any other enquiries, please fill in the form below and I will get back to you as soon as I can.
-
-<link href="Stylesheets/contact.css" rel="stylesheet">
 
 <div class="contact-form-body">
     <form name="email-form" id="email-form" enctype="text/plain" action="#" target="hidden_iframe" onsubmit="submitted=true;">
