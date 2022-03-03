@@ -5,3 +5,6 @@
 
 ### GitHub:
 [https://github.com/SeanStrain](https://github.com/SeanStrain)
+
+### Wikipedia:
+[https://en.wikipedia.org/wiki/User:Seanstrain3001](https://en.wikipedia.org/wiki/User:Seanstrain3001)
