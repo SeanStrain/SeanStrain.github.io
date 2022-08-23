@@ -1,6 +1,6 @@
 # Welcome!
 
-Hi there! My name is Sean Strain, a 3rd year BSc Computer Science student at the University of Edinburgh. This is my website which was made using GitHub pages. It stores my code portfolio, my CV, and other bits about me.
+Hi there! My name is Sean Strain, a 5th year MInf Informatics student at the University of Edinburgh. This is my website which was made using GitHub pages. It stores my code portfolio, my CV, and other bits about me.
 
 Please, take a look around!
 
