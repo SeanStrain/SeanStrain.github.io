@@ -10,6 +10,12 @@ This section contains the various projects I have completed as part of my studie
 
 ### 4th Year
 
+#### Thesis: 'Automatically Generating Contextualised Responses to Phishing Reports'
+
+My thesis in 4th Year was admitted to the 'Outstanding Project' archive of the University of Edinburgh 2021/22 for creating a thesis that achieved a mark of 80% and above.
+
+You may download it [here](/Files/Automatically_Generating_Contextualised_Responses_to_Phishing_Reports_-_Sean_Strain.pdf), or visit the [University of Edinburgh's Outstanding Project archive](https://www.ed.ac.uk/informatics/undergraduate/our-degrees/outstanding-undergraduate-projects).
+
 #### Displacement Sphere
 
 <img align="center" src="/Images/Displacement_Sphere_small.jpeg" alt="drawing" width="50%"/>
