@@ -6,6 +6,8 @@ document.getElementById("menu-button").addEventListener("click", () =>
 {
     if (enabled)
     {
+        const menu1 = document.getElementById("menu-1");
+        const height = parseInt(window.getComputedStyle(menu1).getPropertyValue('height'.split("px")[0]));
         deg1 = 0;
         deg2 = 0;
         enabled = false;
@@ -19,13 +21,13 @@ document.getElementById("menu-button").addEventListener("click", () =>
         gsap.to("#menu-1",
         {
             duration: 0.5,
-            transform: `rotate3d(0, 0, 1, ${deg1}deg) translateY(10px)`,
+            transform: `rotate3d(0, 0, 1, ${deg1}deg) translateY(${10 + height}px)`,
             ease: "power2.out"
         });
         gsap.to("#menu-3",
         {
             duration: 0.5,
-            transform: `rotate3d(0, 0, 1, ${deg2}deg) translateY(-10px)`,
+            transform: `rotate3d(0, 0, 1, ${deg2}deg) translateY(-${10 + height}px)`,
             ease: "power2.out"
         });
         

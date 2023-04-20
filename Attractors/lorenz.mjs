@@ -287,10 +287,15 @@ function init()
 
     if (first_init)
     {
+        const menu1 = document.getElementById("menu-1");
+        const height = parseInt(window.getComputedStyle(menu1).getPropertyValue('height'.split("px")[0]));
         spans.forEach((span, index) =>
         {
             setTimeout(() => {
-                target = 10 * index - 10
+                h = 0
+                if (index == 0) h = -height
+                if (index == 2) h = height
+                target = 10 * index - 10 + h
                 gsap.to(span,
                 {
                     transform: `translate(0, ${target}px)`,
