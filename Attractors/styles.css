@@ -1,0 +1,126 @@
+:root
+{
+    font-family: Segoe UI, Frutiger, Frutiger Linotype, Dejavu Sans, Helvetica Neue, Arial, sans-serif; 
+}
+
+body
+{
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+}
+
+canvas 
+{}
+
+#framerate
+{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: #76B900;
+    padding: 5px;
+}
+
+#start-wrapper
+{
+    color: azure;
+    position: absolute;
+    left: 25vw;
+    right: 25vw;
+    top: calc(50% - 2vh);
+    display: flex;
+    overflow: hidden;
+}
+
+#start
+{
+    height: 100%;
+    width: 100%;
+    font-size: 8vmin;
+    text-align: center;
+    user-select: none;
+    will-change: transform;
+}
+
+
+/* TOGGLE MENU: */
+.toggle-menu
+{
+    position: absolute;
+    float: right;
+    top: 10px;
+    right: 10px;
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    background-color: transparent;
+    display: none;
+    border: none;
+}
+
+.visible
+{
+    display: block;
+}
+
+.toggle-menu > div
+{
+    color: whitesmoke;
+    position: absolute;
+    transform: translate(-140%, calc(-60px - 50%));
+    transition: transform 0.5s ease;
+}
+
+.toggle-menu:hover > div
+{
+    transform: translate(-140%, -50%);
+    transition: transform 0.5s ease;
+}
+
+.toggle-menu > span
+{
+    position: absolute;
+    display: block;
+    height: 2px;
+    width: 26px;
+    background-color: azure;
+    transform: translateY(calc(-60px - 50%));
+}
+.toggle-menu > span.active
+{
+    transform: rotate3d(0, 0, 1, 45deg) translateY(calc(-60px - 50%));
+}
+/* END TOGGLE MENU */
+
+.menu 
+{
+    position: absolute;
+    border-radius: 15px;
+    border: #242A33 2px solid;
+    background-color: #242A33;
+    color: white;
+    margin: 15px;
+    padding: 15px;
+    right: 0;
+    top: 45px;
+    display: none;
+}
+
+.menu.open 
+{
+    display: block;
+}
+
+.menu-item-wrapper
+{
+    padding-bottom: 10px;
+}
+
+select
+{
+    opacity: 1;
+}
+
+option
+{}
