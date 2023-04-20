@@ -248,7 +248,7 @@ class Particle
 // FUNCTIONS:
 var particles = []
 var strokes = []
-var state = 0
+var state = 1
 var show_particles = false
 var stroke_life = 70
 var size_modifier_x = 1
