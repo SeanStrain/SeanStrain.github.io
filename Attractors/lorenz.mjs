@@ -348,7 +348,6 @@ function init()
             var max_z = 0
             attractor = function(x, y, z)
             {
-                console.log(alpha)
                 framerate = speed_modifier * 0.017
                 x += (x + (y - x) * alpha) * framerate
                 y += (x * (rho - z) - y) * framerate
