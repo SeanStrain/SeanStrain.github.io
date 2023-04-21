@@ -1,7 +1,7 @@
 // GLOBALS:
-
-var canvasEl  = document.querySelector('canvas')
-var context   = canvasEl.getContext('2d')
+const info = document.getElementById("attractor-info")
+const canvasEl  = document.querySelector('canvas')
+const context   = canvasEl.getContext('2d')
 
 canvasEl.width  = innerWidth
 canvasEl.height = innerHeight
@@ -305,12 +305,14 @@ function init()
         })
     }
 
+    let infoString
     var start_x = 0
     var start_y = 0
     switch(state)
     {
         case 0: // Lorenz
-            
+            infoString = "Lorenz Attractor<br> &nbsp dx/dt = σ(y - x)<br> &nbsp dy/dt = x(ρ - z) - y<br> &nbsp dz/dt = xy - zβ"
+
             var alpha, beta, rho
 
             document.getElementById("lorenz-variables").style.display = ""
@@ -330,6 +332,8 @@ function init()
             alpha = 10
             beta = 2.7
             rho = 28
+
+
 
             start_x = 0
             start_y = 0
@@ -386,6 +390,7 @@ function init()
             break   
 
         case 1: // Aizawa
+            infoString = "Aizawa Attractor<br> &nbsp dx/dt = z + 1/2 - a(x² + y²) + x<br> &nbsp dy/dt = d + x - y(x² + z²)<br> &nbsp dz/dt = b + y - z(x² + y²)"
 
             var alpha = 0.8
             var beta = 0.7
@@ -480,6 +485,11 @@ function init()
             }
             break
     }
+
+    setTimeout(() => { 
+        gsap.to(info, {opacity: 1, duration: 0.5})
+        info.innerHTML = infoString
+    }, 1500) // Fade in info
 
     generation()
 
@@ -590,6 +600,7 @@ function clearup()
     //         }
     //     })
     // }
+    gsap.to(info, {opacity: 0, duration: 0.5})
     particles = []
     strokes = []
     drawing = true

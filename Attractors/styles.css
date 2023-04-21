@@ -10,9 +10,6 @@ body
     background-color: black;
 }
 
-canvas 
-{}
-
 #framerate
 {
     position: absolute;
@@ -22,6 +19,7 @@ canvas
     padding: 5px;
 }
 
+/* start */
 #start-wrapper
 {
     color: azure;
@@ -42,9 +40,9 @@ canvas
     user-select: none;
     will-change: transform;
 }
+/* end start */
 
-
-/* TOGGLE MENU: */
+/* menu: */
 .toggle-menu
 {
     position: absolute;
@@ -91,7 +89,6 @@ canvas
 {
     transform: rotate3d(0, 0, 1, 45deg) translateY(calc(-60px - 50%));
 }
-/* END TOGGLE MENU */
 
 @media (orientation: portrait)
 {
@@ -154,11 +151,20 @@ canvas
 {
     padding-bottom: 10px;
 }
+/* end menu */
 
 select
 {
     opacity: 1;
 }
 
-option
-{}
+#attractor-info
+{
+    opacity: 0;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    color: white;
+    padding: 5px;
+    font-size: 1.5vmin;
+}
