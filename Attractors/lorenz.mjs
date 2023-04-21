@@ -152,7 +152,6 @@ var canvas  = new Canvas(canvasEl, context, canvasColour, '0')
 context.lineWidth = 2
 
 // STROKE:
-var speed_modifier = 1 / 2
 var colour = function() {}
 class Stroke
 {
@@ -211,7 +210,6 @@ class Particle
 
         this.context = context
 
-
         this.alpha = 1
 
         this.attractor = attractor
@@ -219,13 +217,12 @@ class Particle
 
     draw()
     {
-        //context.globalAlpha = this.alpha
-        //context.beginPath()
 
         var old_x = this.x
         var old_y = this.y
         var old_z = this.z
 
+        //let axis = { x: 1.0, y: 2.0, z: 3.0 };
         var xyz = this.attractor(this.x, this.y, this.z)
         this.x = xyz["x"]
         this.y = xyz["y"]
@@ -254,6 +251,7 @@ var stroke_life = 70
 var size_modifier_x = 1
 var size_modifier_y = 1
 var drawing = true
+var generating = false
 var first_init = true
 var resize_modifier = function() {}
 var generation = function() {}
@@ -280,7 +278,7 @@ function init()
     var spans = [document.getElementById("menu-1"), document.getElementById("menu-2"), document.getElementById("menu-3")]
 
     const things = $('#variable-wrapper').children()
-    for (i = 1; i < things.length; i++)
+    for (i = 2; i < things.length; i++)
     {
         things[i].style.display = "none"
     }
@@ -305,9 +303,77 @@ function init()
         })
     }
 
-    let infoString
-    var start_x = 0
-    var start_y = 0
+    var axis1, axis2, axis3
+    const targetXTransform = {"rotate3D": "(0, 0, 1, 90deg)", "translate": "(22px, -28px)"}
+    const targetYTransform = {"rotate3D": "(0, 0, 0, 0deg)", "translate": "(0, 0)"}
+    const targetZTransform = {"rotate3D": "(1, 0, 0, 90deg)", "translate": "(0, 0)"}
+    const originalTransforms = [targetXTransform, targetYTransform, targetZTransform]
+    var targetTransforms = [targetXTransform, targetYTransform, targetZTransform]
+    function updateAxis(axisIndex, newValue) 
+    {
+        let axes = ["x", "y", "z"]
+
+        console.log(axisIndex, newValue);
+        let axisValues = [axis1, axis2, axis3];
+        let oldValue = axisValues[axisIndex];
+      
+        if (newValue === oldValue) {
+          return;
+        }
+      
+        let duplicateIndex = axisValues.findIndex((value) => value === newValue);
+        if (duplicateIndex >= 0) {
+            axisValues[duplicateIndex] = oldValue;
+            document.getElementById(`axis-${duplicateIndex + 1}`).value = oldValue;
+
+            gsap.to(document.getElementById(`${axes[duplicateIndex]}-axis`), {
+            transform: `rotate3d${targetTransforms[axisIndex]['rotate3D']} translate${targetTransforms[axisIndex]['translate']}`,
+            duration: 0.5,
+            });
+            gsap.to(document.getElementById(`${axes[axisIndex]}-axis`), {
+            transform: `rotate3d${targetTransforms[duplicateIndex]['rotate3D']} translate${targetTransforms[duplicateIndex]['translate']}`,
+            duration: 0.5,
+            });
+
+            let temp = targetTransforms[axisIndex]
+            targetTransforms[axisIndex] = targetTransforms[duplicateIndex]
+            targetTransforms[duplicateIndex] = temp
+
+        }
+      
+        axisValues[axisIndex] = newValue;
+        [axis1, axis2, axis3] = axisValues;
+    }
+
+    document.getElementById("axis-1").addEventListener("input", function() {
+        let newValue = String(document.getElementById("axis-1").value);
+        updateAxis(0, newValue);
+      });
+      
+      document.getElementById("axis-2").addEventListener("input", function() {
+        let newValue = String(document.getElementById("axis-2").value);
+        updateAxis(1, newValue);
+      });
+      
+      document.getElementById("axis-3").addEventListener("input", function() {
+        let newValue = String(document.getElementById("axis-3").value);
+        updateAxis(2, newValue);
+      });
+
+    axis1 = "x"
+    document.getElementById(`axis-1`).value = 'x';
+    axis2 = "y"
+    document.getElementById(`axis-2`).value = 'y';
+    axis3 = "z"
+    document.getElementById(`axis-3`).value = 'z';
+
+    var speed_modifier = 1
+    document.getElementById("speed").addEventListener("input", function()
+    {
+        speed_modifier = parseFloat(document.getElementById("speed").value)
+    })
+
+    var infoString, start_x, start_y
     switch(state)
     {
         case 0: // Lorenz
@@ -333,12 +399,8 @@ function init()
             beta = 2.7
             rho = 28
 
-
-
             start_x = 0
             start_y = 0
-
-            speed_modifier = 1 / 2
 
             resize_modifier = function()
             {
@@ -354,43 +416,34 @@ function init()
 
             generation = function()
             {
+                generating = true
                 for (var i = 1; i < num_particles; i += 1)
                 {
                     let middle = 1.5
                     let particle = new Particle(-middle + i / 25, -middle + i / 25, particle_radius)
                     particles.push(particle)
                 }
+                generating = false
             }
 
-            var min_x = 0
-            var max_x = 0
-            var min_y = 0
-            var max_y = 0
-            var min_z = 0
-            var max_z = 0
-            attractor = function(x, y, z)
-            {
-                framerate = speed_modifier * 0.017
-                x += (x + (y - x) * alpha) * framerate
-                y += (x * (rho - z) - y) * framerate
-                z += (x * y - beta * z) * framerate
-                
-                if (x < min_x) { min_x = x }
-                if (x > max_x) { max_x = x }
-                if (y < min_y) { min_y = y }
-                if (y > max_y) { max_y = y }
-                if (z < min_z) { min_z = z }
-                if (z > max_z) { max_z = z }
+            attractor = function(x, y, z) {
+                framerate = speed_modifier / 2 * 0.017;
+            
+                let axis = { "x": x, "y": y, "z": z }
 
-                //console.log(min_x, max_x, min_y, max_y, min_z, max_z)
-
-                return {"x": x, "y": y, "z": z}
+                axis[axis1] += (axis[axis1] + (axis[axis2] - axis[axis1]) * alpha) * framerate
+                axis[axis2] += (axis[axis1] * (rho - axis[axis3]) - axis[axis2]) * framerate
+                axis[axis3] += (axis[axis1] * axis[axis2] - beta * axis[axis3]) * framerate
+                return axis;
             }
+            
 
             break   
 
         case 1: // Aizawa
             infoString = "Aizawa Attractor<br> &nbsp dx/dt = z + 1/2 - a(x² + y²) + x<br> &nbsp dy/dt = d + x - y(x² + z²)<br> &nbsp dz/dt = b + y - z(x² + y²)"
+
+            num_particles = 60
 
             var alpha = 0.8
             var beta = 0.7
@@ -428,8 +481,6 @@ function init()
             start_x = 0
             start_y = midy
 
-            speed_modifier = 2 / 60
-
             resize_modifier = function()
             {
                 size_modifier_x = 0.25 * innerHeight
@@ -444,6 +495,7 @@ function init()
 
             generation = function()
             {
+                generating = true
                 j = num_particles
                 i = - j / 2
                 const interval = setInterval(() =>
@@ -452,43 +504,55 @@ function init()
                     particles.push(particle)
                     i += 1
                     if (j > 0) { j -= 1 }
-                    if (j == 0) { clearInterval(interval) }
+                    if (j == 0 || generating === false) { 
+                        particles.pop()
+                        clearInterval(interval) 
+                    }
                 }, 75)
+                
             }
 
             attractor = function(x, y, z)
             {
-                framerate = speed_modifier// *  1 / Math.max(60, fps)
+                framerate = speed_modifier / 30;
 
-                var temp_x = x
-
-                var sign = 1
-                if (y < 0)
-                {
-                    sign = -1
-                }
-                var temp_y = y + Math.random() * 0.001 * sign
-                var temp_z = z
-
-                temp_x += (((z - beta) * x) - (delta * y)) * framerate
-                temp_y += ((delta * x) + (z - beta) * y) * framerate
-
-                var z1 = (gamma + (alpha * z) - Math.pow(z, 3.0) / 3.0 - (Math.pow(x, 2.0) + Math.pow(y, 2.0)))
-                var z2 = (1 + epsilon * z) + (zeta * z * Math.pow(x, 3.0))
-
-                temp_z += z1 * z2 * framerate
-
-                x = temp_x + Math.random() * 0.0001
-                y = temp_y + Math.random() * 0.0001 * sign
-                z = temp_z + Math.random() * 0.0001
-                return {"x": x, "y": y, "z": z}
+                let axis = { "x": x, "y": y, "z": z };
+                let temp = {};
+            
+                temp[axis1] = axis[axis1];
+                temp[axis2] = axis[axis2] + (axis[axis2] < 0 ? -1 : 1) * Math.random() * 0.001;
+                temp[axis3] = axis[axis3];
+            
+                temp[axis1] += (((axis[axis3] - beta) * axis[axis1]) - (delta * axis[axis2])) * framerate;
+                temp[axis2] += ((delta * axis[axis1]) + (axis[axis3] - beta) * axis[axis2]) * framerate;
+            
+                let z1 = (gamma + (alpha * axis[axis3]) - Math.pow(axis[axis3], 3.0) / 3.0 - (Math.pow(axis[axis1], 2.0) + Math.pow(axis[axis2], 2.0)));
+                let z2 = (1 + epsilon * axis[axis3]) + (zeta * axis[axis3] * Math.pow(axis[axis1], 3.0));
+            
+                temp[axis3] += z1 * z2 * framerate;
+            
+                axis[axis1] = temp[axis1] + Math.random() * 0.0001;
+                axis[axis2] = temp[axis2] + (temp[axis2] < 0 ? -1 : 1) * Math.random() * 0.0001;
+                axis[axis3] = temp[axis3] + Math.random() * 0.0001;
+            
+                return axis;
             }
             break
     }
 
+    let axes = ["x", "y", "z"]
+    for (let i = 0; i < 3; i++)
+    {
+        gsap.to(document.getElementById(`${axes[i]}-axis`), {transform: "", duration: 0.5})
+    }
+
+    targetTransforms = originalTransforms
+
     setTimeout(() => { 
-        gsap.to(info, {opacity: 1, duration: 0.5})
+        gsap.to(info, {opacity: 1, duration: 2})
         info.innerHTML = infoString
+
+        gsap.to(document.getElementById("axes"), {opacity: 1, duration: 2})
     }, 1500) // Fade in info
 
     generation()
@@ -588,7 +652,7 @@ addEventListener("click", (event) =>
 
 function clearup()
 {
-    drawing = false
+    //drawing = false
     // while (strokes.length != 0)
     // {
     //     strokes.forEach((stroke, index) =>
@@ -602,7 +666,6 @@ function clearup()
     // }
     gsap.to(info, {opacity: 0, duration: 0.5})
     particles = []
-    strokes = []
     drawing = true
 }
 
@@ -621,5 +684,39 @@ attractor_state.addEventListener("change", function()
             clearup()
             break
     }
-    init()
+    generating = false
+    setTimeout(() =>
+    {
+        strokes = []
+        particles = []
+        init()
+    }, 2000)
 })
+
+/* utils */
+function lerp(start, end, t) {
+    return start * (1 - t) + end * t;
+}
+
+function lerpAxis(axisStart, axisEnd, t) {
+    let axis = {};
+    Object.keys(axisStart).forEach(key => {
+        axis[key] = lerp(axisStart[key], axisEnd[key], t);
+    });
+    return axis;
+}
+
+let transition = function() 
+{
+    let elapsedTime = Date.now() - startTime;
+    let t = Math.min(1, elapsedTime / duration);
+    let axis = lerpAxis(axisStart, axisEnd, t);
+
+    let result = attractor(axis, x,y,z);
+
+    if (t < 1) {
+        requestAnimationFrame(transition);
+    } else {
+        console.log("Transition complete");
+    }
+}

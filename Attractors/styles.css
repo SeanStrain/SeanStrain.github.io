@@ -168,3 +168,50 @@ select
     padding: 5px;
     font-size: 1.5vmin;
 }
+
+/* axes */
+#axes
+{
+    opacity: 0;
+}
+
+#axes > div 
+{
+    position: absolute;
+    width: 5px;
+    height: 50px;
+    bottom: 10px;
+    left: 10px;
+    pointer-events: none;
+}
+
+#x-axis {
+    background-color: blue;
+    transform: rotate3D(0, 0, 1, 90deg) translate(22px, -28px);
+}
+#x-axis-label
+{
+    color: blue;
+    transform: translateY(-200%);
+}
+
+#y-axis {
+    background-color: green;
+    transform: rotate3d(0, 0, 0, 0deg) translate(0, 0);
+}
+#y-axis-label
+{
+    color: green;
+    transform: translateY(-200%);
+}
+
+#z-axis {
+    background-color: red;
+    transform: rotate3d(1, 0, 0, 90deg) translate(0, 0);
+}
+#z-axis-label
+{
+    color: red;
+    transform: translateY(-200%);
+}
+/* end axes */
