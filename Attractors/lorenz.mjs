@@ -183,9 +183,11 @@ class Stroke
         this.alpha -= this.minAlpha
         context.globalAlpha = this.alpha
 
+        let { offsetX, offsetY } = getTranslation(innerWidth, innerHeight, scale);
+
         context.beginPath()
-        context.moveTo(this.begin_x, this.begin_y)
-        context.lineTo(this.end_x, this.end_y)
+        context.moveTo(this.begin_x * scale + offsetX, this.begin_y * scale + offsetY);
+        context.lineTo(this.end_x * scale + offsetX, this.end_y * scale + offsetY);
 
         context.strokeStyle = this.colour
         context.stroke()
@@ -434,6 +436,7 @@ function init()
                 axis[axis1] += (axis[axis1] + (axis[axis2] - axis[axis1]) * alpha) * framerate
                 axis[axis2] += (axis[axis1] * (rho - axis[axis3]) - axis[axis2]) * framerate
                 axis[axis3] += (axis[axis1] * axis[axis2] - beta * axis[axis3]) * framerate
+
                 return axis;
             }
             
@@ -514,28 +517,27 @@ function init()
 
             attractor = function(x, y, z)
             {
-                framerate = speed_modifier / 30;
+                framerate = speed_modifier / 30
 
-                let axis = { "x": x, "y": y, "z": z };
-                let temp = {};
+                let axis = { "x": x, "y": y, "z": z }
+                let temp = {}
             
-                temp[axis1] = axis[axis1];
-                temp[axis2] = axis[axis2] + (axis[axis2] < 0 ? -1 : 1) * Math.random() * 0.001;
-                temp[axis3] = axis[axis3];
+                temp[axis1] = axis[axis1]
+                temp[axis2] = axis[axis2] + (axis[axis2] < 0 ? -1 : 1) * Math.random() * 0.001
+                temp[axis3] = axis[axis3]
             
-                temp[axis1] += (((axis[axis3] - beta) * axis[axis1]) - (delta * axis[axis2])) * framerate;
-                temp[axis2] += ((delta * axis[axis1]) + (axis[axis3] - beta) * axis[axis2]) * framerate;
+                temp[axis1] += (((axis[axis3] - beta) * axis[axis1]) - (delta * axis[axis2])) * framerate
+                temp[axis2] += ((delta * axis[axis1]) + (axis[axis3] - beta) * axis[axis2]) * framerate
             
-                let z1 = (gamma + (alpha * axis[axis3]) - Math.pow(axis[axis3], 3.0) / 3.0 - (Math.pow(axis[axis1], 2.0) + Math.pow(axis[axis2], 2.0)));
-                let z2 = (1 + epsilon * axis[axis3]) + (zeta * axis[axis3] * Math.pow(axis[axis1], 3.0));
+                let z1 = (gamma + (alpha * axis[axis3]) - Math.pow(axis[axis3], 3.0) / 3.0 - (Math.pow(axis[axis1], 2.0) + Math.pow(axis[axis2], 2.0)))
+                let z2 = (1 + epsilon * axis[axis3]) + (zeta * axis[axis3] * Math.pow(axis[axis1], 3.0))
             
-                temp[axis3] += z1 * z2 * framerate;
+                temp[axis3] += z1 * z2 * framerate
             
-                axis[axis1] = temp[axis1] + Math.random() * 0.0001;
-                axis[axis2] = temp[axis2] + (temp[axis2] < 0 ? -1 : 1) * Math.random() * 0.0001;
-                axis[axis3] = temp[axis3] + Math.random() * 0.0001;
-            
-                return axis;
+                axis[axis1] = temp[axis1] + Math.random() * 0.0001
+                axis[axis2] = temp[axis2] + (temp[axis2] < 0 ? -1 : 1) * Math.random() * 0.0001
+                axis[axis3] = temp[axis3] + Math.random() * 0.0001            
+                return axis
             }
             break
     }
@@ -563,6 +565,12 @@ function init()
         first_init = false
     }
 }
+
+var scale = 1
+document.addEventListener("wheel", function(e)
+{
+    scale -= e.deltaY / 2500
+})
 
 var total_ticks = 0
 var ticks = 0
@@ -694,6 +702,44 @@ attractor_state.addEventListener("change", function()
 })
 
 /* utils */
+var offsetX, offsetY
+var deltaX = 0
+var deltaY = 0
+var lastMousePosition = { x: 0, y: 0 }
+var isDragging = false
+function getTranslation(canvasWidth, canvasHeight, scale) {
+    offsetX = deltaX + (canvasWidth - canvasWidth * scale) / 2
+    offsetY = deltaY + (canvasHeight - canvasHeight * scale) / 2
+    return { offsetX, offsetY }
+}
+
+const body = document.getElementById("body")
+body.addEventListener("mousedown", function (e) {
+    if (e.button === 0) {
+      isDragging = true;
+      lastMousePosition = { x: e.clientX, y: e.clientY };
+    }
+})
+  
+body.addEventListener("mousemove", function (e) {
+    if (isDragging) {
+      deltaX += e.clientX - lastMousePosition.x;
+      deltaY += e.clientY - lastMousePosition.y;
+  
+      lastMousePosition = { x: e.clientX, y: e.clientY };
+    }
+})
+  
+body.addEventListener("mouseup", function (e) {
+    if (e.button === 0) {
+      isDragging = false;
+    }
+});
+  
+body.addEventListener("mouseleave", function (e) {
+    isDragging = false;
+})
+
 function lerp(start, end, t) {
     return start * (1 - t) + end * t;
 }
