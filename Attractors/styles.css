@@ -55,6 +55,7 @@ body
     background-color: transparent;
     display: none;
     border: none;
+    user-select: none;
 }
 
 .visible

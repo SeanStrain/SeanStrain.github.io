@@ -444,7 +444,7 @@ function init()
             break   
 
         case 1: // Aizawa
-            infoString = "Aizawa Attractor<br> &nbsp dx/dt = z + 1/2 - a(x² + y²) + x<br> &nbsp dy/dt = d + x - y(x² + z²)<br> &nbsp dz/dt = b + y - z(x² + y²)"
+            infoString = "Aizawa Attractor<br> &nbsp dx/dt = x(z - β) - δy<br> &nbsp dy/dt = δx - y(z-β)<br> &nbsp dz/dt = γ + αz - z³/3 - (x² + y²)(1 + εz) + ζzx³"
 
             num_particles = 60
 
@@ -565,12 +565,6 @@ function init()
         first_init = false
     }
 }
-
-var scale = 1
-document.addEventListener("wheel", function(e)
-{
-    scale -= e.deltaY / 2500
-})
 
 var total_ticks = 0
 var ticks = 0
@@ -701,7 +695,13 @@ attractor_state.addEventListener("change", function()
     }, 2000)
 })
 
-/* utils */
+/* mouse movement */
+var scale = 1
+document.addEventListener("wheel", function(e)
+{
+    scale -= e.deltaY / 2500
+})
+
 var offsetX, offsetY
 var deltaX = 0
 var deltaY = 0
@@ -739,7 +739,9 @@ body.addEventListener("mouseup", function (e) {
 body.addEventListener("mouseleave", function (e) {
     isDragging = false;
 })
+/* end mouse movement */
 
+/* utils */
 function lerp(start, end, t) {
     return start * (1 - t) + end * t;
 }
