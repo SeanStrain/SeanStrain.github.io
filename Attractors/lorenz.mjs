@@ -381,6 +381,9 @@ function init()
         case 0: // Lorenz
             infoString = "Lorenz Attractor<br> &nbsp dx/dt = σ(y - x)<br> &nbsp dy/dt = x(ρ - z) - y<br> &nbsp dz/dt = xy - zβ"
 
+            deltaX = 0
+            deltaY = 0
+
             var alpha, beta, rho
 
             document.getElementById("lorenz-variables").style.display = ""
@@ -455,6 +458,7 @@ function init()
             var epsilon = 0.25
             var zeta = 0.1
 
+            deltaX = 0
             deltaY = -100
 
             document.getElementById("aizawa-variables").style.display = ""
