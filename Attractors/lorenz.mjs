@@ -455,6 +455,8 @@ function init()
             var epsilon = 0.25
             var zeta = 0.1
 
+            deltaY = -100
+
             document.getElementById("aizawa-variables").style.display = ""
             document.getElementById("aizawa-alpha").addEventListener("input", function()
             {
@@ -526,17 +528,17 @@ function init()
                 temp[axis2] = axis[axis2] + (axis[axis2] < 0 ? -1 : 1) * Math.random() * 0.001
                 temp[axis3] = axis[axis3]
             
-                temp[axis1] += (((axis[axis3] - beta) * axis[axis1]) - (delta * axis[axis2])) * framerate
-                temp[axis2] += ((delta * axis[axis1]) + (axis[axis3] - beta) * axis[axis2]) * framerate
+                temp[axis3] += (((axis[axis2] - beta) * axis[axis3]) - (delta * axis[axis1])) * framerate
+                temp[axis1] += ((delta * axis[axis3]) + (axis[axis2] - beta) * axis[axis1]) * framerate
             
-                let z1 = (gamma + (alpha * axis[axis3]) - Math.pow(axis[axis3], 3.0) / 3.0 - (Math.pow(axis[axis1], 2.0) + Math.pow(axis[axis2], 2.0)))
-                let z2 = (1 + epsilon * axis[axis3]) + (zeta * axis[axis3] * Math.pow(axis[axis1], 3.0))
+                let z1 = (gamma + (alpha * axis[axis2]) - Math.pow(axis[axis2], 3.0) / 3.0 - (Math.pow(axis[axis3], 2.0) + Math.pow(axis[axis1], 2.0)))
+                let z2 = (1 + epsilon * axis[axis2]) + (zeta * axis[axis2] * Math.pow(axis[axis3], 3.0))
             
-                temp[axis3] += z1 * z2 * framerate
+                temp[axis2] += z1 * z2 * framerate
             
-                axis[axis1] = temp[axis1] + Math.random() * 0.0001
-                axis[axis2] = temp[axis2] + (temp[axis2] < 0 ? -1 : 1) * Math.random() * 0.0001
-                axis[axis3] = temp[axis3] + Math.random() * 0.0001            
+                axis[axis3] = temp[axis3] + Math.random() * 0.0001
+                axis[axis1] = temp[axis1] + (temp[axis1] < 0 ? -1 : 1) * Math.random() * 0.0001
+                axis[axis2] = temp[axis2] + Math.random() * 0.0001            
                 return axis
             }
             break
