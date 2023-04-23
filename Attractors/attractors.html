@@ -36,7 +36,9 @@
                 <div>Attractor Type:</div>
                 <select id="attractor-state" class="menu-item">
                     <option value="0">Lorenz</option>
-                    <option selected value="1">Aizawa</option>
+                    <option value="1">Aizawa</option>
+                    <option selected value="2">Thomas</option>
+                    <option value="3">Dadras</option>
                 </select>
             </div>
             <div class="menu-item-wrapper">
@@ -106,6 +108,12 @@
                     <div class="menu-item">
                         <div>zeta:</div>
                         <input type="number" id="aizawa-zeta" value="0.10" step="0.05">
+                    </div>
+                </div>
+                <div id="thomas-variables" style="display: none">
+                    <div class="menu-item">
+                        <div>β:</div>
+                        <input type="number" id="thomas-beta" value="0.208186" step="0.05">
                     </div>
                 </div>
             </div>
