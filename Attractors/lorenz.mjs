@@ -861,26 +861,40 @@ show_framerate_state.addEventListener("change", function()
 })
 
 /* mouse movement */
-var scale = 1
-document.addEventListener("wheel", function(e)
-{
-    scale -= e.deltaY / 2500
-})
+var targetScale = 1;
+var scale = 1;
+var lerpAmount = 0.1; 
+
+document.addEventListener("wheel", function (e) {
+  targetScale -= e.deltaY / 2500;
+});
+
+function updateScale() {
+  scale = lerp(scale, targetScale, lerpAmount);
+  requestAnimationFrame(updateScale);
+}
+
+updateScale();
 
 // drag vars
 var offsetX, offsetY
+var targetDeltaX = 0;
+var targetDeltaY = 0;
 var deltaX = 0
 var deltaY = 0
 var lastMousePosition = { x: 0, y: 0 }
 var isDragging = false
 
 // right click vars
-let isRightClick = false;
-let lastMouseX = 0;
-let lastMouseY = 0;
-let rotationX = 0;
-let rotationY = 0;
-let rotationZ = 0;
+var isRightClick = false;
+var lastMouseX = 0;
+var lastMouseY = 0;
+var targetRotationX = 0;
+var targetRotationY = 0;
+var rotationX = 0;
+var rotationY = 0;
+var rotationZ = 0;
+
 
 function getTranslation(canvasWidth, canvasHeight, scale) {
     offsetX = deltaX + (canvasWidth - canvasWidth * scale) / 2
@@ -902,29 +916,24 @@ body.addEventListener("mousedown", function (e)
       }
 })
   
-body.addEventListener("mousemove", function (e) 
-{
-    if (isDragging) 
-    {
-      deltaX += e.clientX - lastMousePosition.x;
-      deltaY += e.clientY - lastMousePosition.y;
+body.addEventListener("mousemove", function (e) {
+    if (isDragging) {
+      targetDeltaX += e.clientX - lastMousePosition.x;
+      targetDeltaY += e.clientY - lastMousePosition.y;
   
       lastMousePosition = { x: e.clientX, y: e.clientY };
     }
-    if (isRightClick) 
-    {
-        const deltaX = e.clientX - lastMouseX;
-        const deltaY = e.clientY - lastMouseY;
-    
-        rotationX += deltaY * 0.005; // Adjust the multiplier to change rotation sensitivity
-        rotationY += deltaX * 0.005; // Adjust the multiplier to change rotation sensitivity
-    
-        lastMouseX = e.clientX;
-        lastMouseY = e.clientY;
-
-        // Redraw the canvas if required
-      }
-})
+    if (isRightClick) {
+      const deltaX = e.clientX - lastMouseX;
+      const deltaY = e.clientY - lastMouseY;
+  
+      targetRotationX += deltaY * 0.005;
+      targetRotationY += deltaX * 0.005;
+  
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    }
+});
 
 body.addEventListener("mouseup", function (e) {
     if (e.button === 0) {
@@ -937,6 +946,7 @@ body.addEventListener("mouseup", function (e) {
   
 body.addEventListener("mouseleave", function (e) {
     isDragging = false;
+    isRightClick = false;
 })
 
 canvasEl.addEventListener('contextmenu', (e) => {
@@ -981,12 +991,24 @@ function rotateZ(point, angle)
 
     return { x: x, y: y, z: point.z };
 }
+
+function updateTranslationAndRotation() {
+    deltaX = lerp(deltaX, targetDeltaX, lerpAmount);
+    deltaY = lerp(deltaY, targetDeltaY, lerpAmount);
+    rotationX = lerp(rotationX, targetRotationX, lerpAmount);
+    rotationY = lerp(rotationY, targetRotationY, lerpAmount);
+  
+    requestAnimationFrame(updateTranslationAndRotation);
+}
+  
+updateTranslationAndRotation();
+
 /* end rotation */
 
 /* utils */
-function lerp(start, end, t) {
-    return start * (1 - t) + end * t;
-}
+function lerp(start, end, amount) {
+    return start * (1 - amount) + end * amount;
+  }
 
 function lerpAxis(axisStart, axisEnd, t) {
     let axis = {};
