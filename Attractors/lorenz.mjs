@@ -165,8 +165,8 @@ class Stroke
         this.life = 70
         this.minAlpha = this.alpha / this.life
 
-        const hue = Math.abs(this.begin_point.x * 80 + total_ticks)
-        const sat = Math.abs(this.begin_point.y * 80 + total_ticks)
+        const hue = Math.abs(this.begin_point.x * 40 + total_ticks)
+        const sat = Math.abs(this.begin_point.y * 40 + total_ticks)
         this.colour = colour(hue, sat, this.z)
 
         this.new = true
@@ -450,7 +450,9 @@ function init()
 
             colour = function(hue, sat, z)
             {
-                return "hsl(" + hue + "," + sat + "%," + (Math.abs(z) + 50) + "%)"
+                let hue_ = hue / 10
+                let sat_ = sat / 10
+                return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
             }
 
             generation = function()
@@ -530,7 +532,7 @@ function init()
 
             colour = function(hue, sat, z)
             {
-                return "hsl(" + hue + "," + sat + "%," + (z * 20 + 50) + "%)"
+                return "hsl(" + hue + "," + sat + "%," + 50 + "%)"
             }
 
             generation = function()
@@ -600,8 +602,7 @@ function init()
 
             colour = function(hue, sat, z)
             {
-                let axis = { "x": hue, "y": sat, "z": z };
-                return "hsl(" + hue + "," + sat + "%," + (Math.max(25, z * 12)) + "%)"
+                return "hsl(" + hue + "," + sat + "%," + 50 + "%)"
             }
 
             generation = function()
@@ -646,8 +647,9 @@ function init()
 
             colour = function(hue, sat, z)
             {
-                let axis = { "x": hue, "y": sat, "z": z };
-                return "hsl(" + hue + "," + sat + "%," + (Math.max(25, z * 12)) + "%)"
+                let hue_ = hue / 5
+                let sat_ = sat / 5
+                return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
             }
 
             generation = function()
@@ -744,7 +746,7 @@ function animate()
         ticks = 0
         document.getElementById("framerate").innerHTML = fps
     }
-    console.log(total_ticks)
+
     total_ticks += 1;
     ticks += 1;
 }
