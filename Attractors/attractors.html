@@ -5,16 +5,14 @@
         <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     </head>
     <body id="body">
-        <div id="framerate">
-
-        </div>
+        <div id="framerate" style="display:none"></div>
         <div id="attractor-info">
             
         </div>
         <div id="start-wrapper">
             <div id="start">Click to begin</div>
         </div>
-        <div id="axes">
+        <div id="axes" style="display:none">
             <div id="x-axis">
                 <div id="x-axis-label">x</div>
             </div>
@@ -42,6 +40,20 @@
                 </select>
             </div>
             <div class="menu-item-wrapper">
+                <div class="menu-item">
+                    <div>Show Particles:</div>
+                    <select id="show-particles">
+                        <option selected value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                    <div>Show Framerate:</div>
+                    <select id="show-framerate">
+                        <option selected value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="menu-item-wrapper" style="display:none">
                 <div>Axes:</div>
                 <div class="menu-item">
                     <div>Axis 1:</div>

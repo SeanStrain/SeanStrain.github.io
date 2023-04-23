@@ -155,25 +155,18 @@ context.lineWidth = 2
 var colour = function() {}
 class Stroke
 {
-    constructor(begin_x, begin_y, end_x, end_y, z, alpha, context)
+    constructor(begin_point, end_point, z, alpha)
     {
-        this.begin_x = Math.floor(begin_x * size_modifier_x + midx)
-        this.begin_y = Math.floor(begin_y * size_modifier_y + midy)
-        this.end_x = Math.floor(end_x * size_modifier_x + midx)
-        this.end_y = Math.floor(end_y * size_modifier_y + midy)
-
-        //console.log(this.begin_x, this.begin_y, this.end_x, this.end_y)
-
-        this.z = z
+        this.begin_point = {... begin_point};
+        this.end_point = {... end_point};
+        this.z = z;
 
         this.alpha = alpha
         this.life = 70
         this.minAlpha = this.alpha / this.life
 
-        this.context = context
-
-        var hue = Math.abs(this.end_x / 10 + total_ticks)
-        var sat = Math.abs(this.end_y / 10)
+        const hue = Math.abs(this.begin_point.x * 80 + total_ticks)
+        const sat = Math.abs(this.begin_point.y * 80 + total_ticks)
         this.colour = colour(hue, sat, this.z)
 
         this.new = true
@@ -181,19 +174,33 @@ class Stroke
 
     draw()
     {
-        this.new = false
+        this.new = false;
 
-        this.alpha -= this.minAlpha
-        context.globalAlpha = this.alpha
-
+        this.alpha -= this.minAlpha;
+        context.globalAlpha = this.alpha;
+    
+        let begin_rotated = rotateX(this.begin_point, rotationX);
+        begin_rotated = rotateY(begin_rotated, rotationY);
+        begin_rotated = rotateZ(begin_rotated, rotationZ);
+      
+        let end_rotated = rotateX(this.end_point, rotationX);
+        end_rotated = rotateY(end_rotated, rotationY);
+        end_rotated = rotateZ(end_rotated, rotationZ);
+      
+        const begin_x = (begin_rotated.x * focalLength) / (begin_rotated.z + focalLength) * size_modifier_x + midx;
+        const begin_y = (begin_rotated.y * focalLength) / (begin_rotated.z + focalLength) * size_modifier_y + midy;
+      
+        const end_x = (end_rotated.x * focalLength) / (end_rotated.z + focalLength) * size_modifier_x + midx;
+        const end_y = (end_rotated.y * focalLength) / (end_rotated.z + focalLength) * size_modifier_y + midy;
+    
         let { offsetX, offsetY } = getTranslation(innerWidth, innerHeight, scale);
-
-        context.beginPath()
-        context.moveTo(this.begin_x * scale + offsetX, this.begin_y * scale + offsetY);
-        context.lineTo(this.end_x * scale + offsetX, this.end_y * scale + offsetY);
-
-        context.strokeStyle = this.colour
-        context.stroke()
+    
+        context.beginPath();
+        context.moveTo(begin_x * scale + offsetX, begin_y * scale + offsetY);
+        context.lineTo(end_x * scale + offsetX, end_y * scale + offsetY);
+    
+        context.strokeStyle = this.colour;
+        context.stroke();
     }
     update()
     {
@@ -232,32 +239,50 @@ class Particle
         this.x = xyz["x"]
         this.y = xyz["y"]
         this.z = xyz["z"]
+            
+        let begin_point = { x: old_x, y: old_y, z: old_z };
+        let end_point = { x: this.x, y: this.y, z: this.z };
 
-        var stroke = new Stroke(old_x, old_y, this.x, this.y, this.z, 1, this.context)
+        var stroke = new Stroke(begin_point, end_point, this.z, 1)
         if (drawing) strokes.push(stroke)
+      
+        begin_point = rotateX(begin_point, rotationX);
+        begin_point = rotateY(begin_point, rotationY);
+        begin_point = rotateZ(begin_point, rotationZ);
+      
+        end_point = rotateX(end_point, rotationX);
+        end_point = rotateY(end_point, rotationY);
+        end_point = rotateZ(end_point, rotationZ);
+
+        const end_x = (end_point.x * focalLength) / (end_point.z + focalLength) * size_modifier_x + midx;
+        const end_y = (end_point.y * focalLength) / (end_point.z + focalLength) * size_modifier_y + midy;
+      
         if (show_particles)
         {
-            var hue = Math.abs((this.x * size_modifier_x) + midx / 10)
-            var sat = Math.abs((this.y * size_modifier_y) + midy / 10)
+            var hue = Math.abs(end_x / 10)
+            var sat = Math.abs(end_y / 10)
+
+            let { offsetX, offsetY } = getTranslation(innerWidth, innerHeight, scale);
+
             context.beginPath()
             context.fillStyle = colour(hue, sat, this.z)
-            context.arc(Math.floor((this.x * size_modifier_x) + midx), Math.floor((this.y * size_modifier_y) + midy), this.radius, 0, Math.PI * 2)
+            context.arc(Math.floor(end_x * scale + offsetX), 
+                        Math.floor(end_y * scale + offsetY), this.radius, 0, Math.PI * 2);
             context.fill()
         }
     }
 }
 
 // FUNCTIONS:
-var particles = []
-var strokes = []
-var state
-var show_particles = false
-var stroke_life = 70
-var size_modifier_x = 1
-var size_modifier_y = 1
-var drawing = true
-var generating = false
-var first_init = true
+var particles = [];
+var strokes = [];
+var state;
+var size_modifier_x = 1;
+var size_modifier_y = 1;
+var drawing = true;
+var generating = false;
+var first_init = true;
+var focalLength = 1000;
 var resize_modifier = function() {}
 var generation = function() {}
 var attractor = function(x, y, z) {}
@@ -266,16 +291,15 @@ function init()
 
     state = parseFloat(document.getElementById("attractor-state").value)
 
-    var num_particles = 90
-    var particle_radius = 2
+    var num_particles = 80
+    var particle_radius = 4
 
     isMobile = function() {
         let check = false;
         (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
         return check;
     };
-    mobile = isMobile()
-    if (mobile)
+    if (isMobile())
     {
         num_particles = 30
         particle_radius = 3
@@ -379,6 +403,11 @@ function init()
     {
         speed_modifier = parseFloat(document.getElementById("speed").value)
     })
+
+    var colourFunction = function(hue, sat, z)
+    {
+        return "hsl(" + hue + "," + sat + "%," + (Math.abs(z) + 50) + "%)"
+    }
 
     var infoString, start_x, start_y
     switch(state)
@@ -553,7 +582,7 @@ function init()
         case 2: // Thomas
             infoString = "Thomas Attractor<br> &nbsp dx/dt = sin(y) - βx<br> &nbsp dy/dt = sin(z) - βy<br> &nbsp dz/dt = sin(x) - βz"
 
-            num_particles = 80
+            //num_particles = 80
 
             var beta = 0.208186
             document.getElementById("thomas-variables").style.display = ""
@@ -676,10 +705,10 @@ var lastFps = 0
 function animate()
 {
     if (drawing === false) { 
-        var total_ticks = 0
-        var ticks = 0
-        var fps = 60
-        var lastFps = 0
+        total_ticks = 0
+        ticks = 0
+        fps = 60
+        lastFps = 0
         return 
     }
 
@@ -715,8 +744,9 @@ function animate()
         ticks = 0
         document.getElementById("framerate").innerHTML = fps
     }
-    total_ticks++
-    ticks++
+    console.log(total_ticks)
+    total_ticks += 1;
+    ticks += 1;
 }
 
 addEventListener("resize", (event) =>
@@ -792,6 +822,10 @@ attractor_state.addEventListener("change", function()
             state = 2
             clearup()
             break
+        case "3":
+            state = 3
+            clearup()
+            break
     }
     generating = false
     setTimeout(() =>
@@ -802,6 +836,28 @@ attractor_state.addEventListener("change", function()
     }, 2000)
 })
 
+var show_particles = false
+var show_particles_state = document.getElementById('show-particles')
+show_particles_state.addEventListener("change", function()
+{
+    show_particles = !show_particles
+})
+
+var show_framerate = false
+var show_framerate_state = document.getElementById('show-framerate')
+show_framerate_state.addEventListener("change", function()
+{
+    show_framerate = !show_framerate
+    if (show_framerate)
+    {
+        document.getElementById("framerate").style.display = "block"
+    }
+    else
+    {
+        document.getElementById("framerate").style.display = "none"
+    }
+})
+
 /* mouse movement */
 var scale = 1
 document.addEventListener("wheel", function(e)
@@ -809,11 +865,21 @@ document.addEventListener("wheel", function(e)
     scale -= e.deltaY / 2500
 })
 
+// drag vars
 var offsetX, offsetY
 var deltaX = 0
 var deltaY = 0
 var lastMousePosition = { x: 0, y: 0 }
 var isDragging = false
+
+// right click vars
+let isRightClick = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let rotationX = 0;
+let rotationY = 0;
+let rotationZ = 0;
+
 function getTranslation(canvasWidth, canvasHeight, scale) {
     offsetX = deltaX + (canvasWidth - canvasWidth * scale) / 2
     offsetY = deltaY + (canvasHeight - canvasHeight * scale) / 2
@@ -821,32 +887,99 @@ function getTranslation(canvasWidth, canvasHeight, scale) {
 }
 
 const body = document.getElementById("body")
-body.addEventListener("mousedown", function (e) {
+body.addEventListener("mousedown", function (e) 
+{
     if (e.button === 0) {
       isDragging = true;
       lastMousePosition = { x: e.clientX, y: e.clientY };
     }
+    if (e.button === 2) {
+        isRightClick = true;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      }
 })
   
-body.addEventListener("mousemove", function (e) {
-    if (isDragging) {
+body.addEventListener("mousemove", function (e) 
+{
+    if (isDragging) 
+    {
       deltaX += e.clientX - lastMousePosition.x;
       deltaY += e.clientY - lastMousePosition.y;
   
       lastMousePosition = { x: e.clientX, y: e.clientY };
     }
+    if (isRightClick) 
+    {
+        const deltaX = e.clientX - lastMouseX;
+        const deltaY = e.clientY - lastMouseY;
+    
+        rotationX += deltaY * 0.005; // Adjust the multiplier to change rotation sensitivity
+        rotationY += deltaX * 0.005; // Adjust the multiplier to change rotation sensitivity
+    
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+
+        // Redraw the canvas if required
+      }
 })
-  
+
 body.addEventListener("mouseup", function (e) {
     if (e.button === 0) {
       isDragging = false;
+    }
+    if (e.button === 2) {
+        isRightClick = false;
     }
 });
   
 body.addEventListener("mouseleave", function (e) {
     isDragging = false;
 })
+
+canvasEl.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+});
+
+body.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
 /* end mouse movement */
+
+/* rotation */
+function rotateX(point, angle) 
+{
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    const y = point.y * cos - point.z * sin;
+    const z = point.y * sin + point.z * cos;
+
+    return { x: point.x, y: y, z: z };
+}
+
+function rotateY(point, angle) 
+{
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    const x = point.x * cos + point.z * sin;
+    const z = -point.x * sin + point.z * cos;
+
+    return { x: x, y: point.y, z: z };
+}
+  
+function rotateZ(point, angle) 
+{
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    const x = point.x * cos - point.y * sin;
+    const y = point.x * sin + point.y * cos;
+
+    return { x: x, y: y, z: point.z };
+}
+/* end rotation */
 
 /* utils */
 function lerp(start, end, t) {
