@@ -15,6 +15,14 @@ body
     background-color: black;
 }
 
+math
+{
+    opacity: 1;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+    margin-bottom: 10px;
+}
+
 #framerate
 {
     position: absolute;

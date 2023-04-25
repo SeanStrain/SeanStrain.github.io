@@ -1,13 +1,14 @@
 // GLOBALS:
-const info = document.getElementById("attractor-info")
-const canvasEl  = document.querySelector('canvas')
-const context   = canvasEl.getContext('2d')
+const info_wrapper = document.getElementById("attractor-info");
+const canvasEl  = document.querySelector('canvas');
+const context   = canvasEl.getContext('2d');
+const body = document.getElementById("body");
 
-canvasEl.width  = innerWidth
-canvasEl.height = innerHeight
+canvasEl.width  = innerWidth;
+canvasEl.height = innerHeight;
 
-var midx = innerWidth  / 2
-var midy = innerHeight / 2
+var midx = innerWidth  / 2;
+var midy = innerHeight / 2;
 
 // COLOUR
 
@@ -15,42 +16,42 @@ class HSLObject
 {
   constructor(hue, sat, light)
   {
-    this.hue    = hue
-    this.sat    = sat
-    this.light  = light
-    this.makeHSL()
+    this.hue    = hue;
+    this.sat    = sat;
+    this.light  = light;
+    this.makeHSL();
   }
 
   makeHSL()
   {
-    this.hue   = this.hue   % 361
-    this.sat   = this.sat   % 101
-    this.light = this.light % 101
-    this.hsl = `hsl(${this.hue}, ${this.sat}%, ${this.light}%)`
+    this.hue   = this.hue   % 361;
+    this.sat   = this.sat   % 101;
+    this.light = this.light % 101;
+    this.hsl = `hsl(${this.hue}, ${this.sat}%, ${this.light}%)`;
   }
 
   editHue(change)
   {
-    this.hue += change
-    this.makeHSL()
+    this.hue += change;
+    this.makeHSL();
   }
 
   editSat(change)
   {
-    this.sat += change
-    this.makeHSL()
+    this.sat += change;
+    this.makeHSL();
   }
 
   editLight(change)
   {
-    this.light += change
-    this.makeHSL()
+    this.light += change;
+    this.makeHSL();
   }
 
   setLight(value)
   {
-    this.light = value
-    this.makeHSL()
+    this.light = value;
+    this.makeHSL();
   }
 }
 
@@ -58,19 +59,19 @@ class RGBObject
 {
   constructor(red, green, blue)
   {
-    this.rgbMax = 256
-    this.red   = red
-    this.green = green
-    this.blue  = blue
-    this.makeRGB()
+    this.rgbMax = 256;
+    this.red   = red;
+    this.green = green;
+    this.blue  = blue;
+    this.makeRGB();
   }
 
   makeRGB()
   {
-    this.red   = this.red   % this.rgbMax
-    this.green = this.green % this.rgbMax
-    this.blue  = this.blue  % this.rgbMax
-    this.rgb = `rgb(${this.red}, ${this.green}, ${this.blue})`
+    this.red   = this.red   % this.rgbMax;
+    this.green = this.green % this.rgbMax;
+    this.blue  = this.blue  % this.rgbMax;
+    this.rgb = `rgb(${this.red}, ${this.green}, ${this.blue})`;
   }
 
   editRed(change)
@@ -128,28 +129,28 @@ class Canvas
 {
     constructor(canvas, context, colour, id)
     {
-      this.context    = context
-      this.canvas     = canvas
-      this.colour     = colour
-      this.baseColour = colour
-      this.id         = id
+      this.context    = context;
+      this.canvas     = canvas;
+      this.colour     = colour;
+      this.baseColour = colour;
+      this.id         = id;
       this.update = function()
         {
-            this.context.fillStyle = this.colour
-            this.context.clearRect(0, 0, innerWidth, innerHeight)
+            this.context.fillStyle = this.colour;
+            this.context.clearRect(0, 0, innerWidth, innerHeight);
         }
     }
 
     initialise()
     {
-        this.context.fillStyle = this.colour
-        this.context.fillRect(0, 0, innerWidth, innerHeight)
+        this.context.fillStyle = this.colour;
+        this.context.fillRect(0, 0, innerWidth, innerHeight);
     }
 }
 
-var canvasColour = `rbga(${0}, ${0}, ${0}, 0.005)`
-var canvas  = new Canvas(canvasEl, context, canvasColour, '0')
-context.lineWidth = 2
+var canvasColour = `rbga(${0}, ${0}, ${0}, 0.005)`;
+var canvas  = new Canvas(canvasEl, context, canvasColour, '0');
+context.lineWidth = 2;
 
 // STROKE:
 var colour = function() {}
@@ -161,15 +162,15 @@ class Stroke
         this.end_point = {... end_point};
         this.z = z;
 
-        this.alpha = alpha
-        this.life = 70
-        this.minAlpha = this.alpha / this.life
+        this.alpha = alpha;
+        this.life = 70;
+        this.minAlpha = this.alpha / this.life;
 
-        const hue = Math.abs(this.begin_point.x * 40 + total_ticks)
-        const sat = Math.abs(this.begin_point.y * 40 + total_ticks)
-        this.colour = colour(hue, sat, this.z)
+        const hue = Math.abs(this.begin_point.x * 40 + total_ticks);
+        const sat = Math.abs(this.begin_point.y * 40 + total_ticks);
+        this.colour = colour(hue, sat, this.z);
 
-        this.new = true
+        this.new = true;
     }
 
     draw()
@@ -195,16 +196,19 @@ class Stroke
     
         let { offsetX, offsetY } = getTranslation(innerWidth, innerHeight, scale);
     
-        context.beginPath();
-        context.moveTo(begin_x * scale + offsetX, begin_y * scale + offsetY);
-        context.lineTo(end_x * scale + offsetX, end_y * scale + offsetY);
-    
-        context.strokeStyle = this.colour;
-        context.stroke();
+        if (show_strokes)
+        {
+            context.beginPath();
+            context.moveTo(begin_x * scale + offsetX, begin_y * scale + offsetY);
+            context.lineTo(end_x * scale + offsetX, end_y * scale + offsetY);
+        
+            context.strokeStyle = this.colour;
+            context.stroke();
+        }
     }
     update()
     {
-        this.draw()
+        this.draw();
     }
 }
 
@@ -213,32 +217,32 @@ class Particle
 {
     constructor(x, y, radius, context)
     {
-        this.x = x
-        this.y = y
-        this.z = 0
+        this.x = x;
+        this.y = y;
+        this.z = 0;
 
-        this.radius = radius
-        this.base_radius = radius
+        this.radius = radius;
+        this.base_radius = radius;
 
-        this.context = context
+        this.context = context;
 
-        this.alpha = 1
+        this.alpha = 1;
 
-        this.attractor = attractor
+        this.attractor = attractor;
     }
 
     draw()
     {
 
-        var old_x = this.x
-        var old_y = this.y
-        var old_z = this.z
+        var old_x = this.x;
+        var old_y = this.y;
+        var old_z = this.z;
 
         //let axis = { x: 1.0, y: 2.0, z: 3.0 };
         var xyz = this.attractor(this.x, this.y, this.z)
-        this.x = xyz["x"]
-        this.y = xyz["y"]
-        this.z = xyz["z"]
+        this.x = xyz["x"];
+        this.y = xyz["y"];
+        this.z = xyz["z"];
             
         let begin_point = { x: old_x, y: old_y, z: old_z };
         let end_point = { x: this.x, y: this.y, z: this.z };
@@ -256,6 +260,12 @@ class Particle
 
         const end_x = (end_point.x * focalLength) / (end_point.z + focalLength) * size_modifier_x + midx;
         const end_y = (end_point.y * focalLength) / (end_point.z + focalLength) * size_modifier_y + midy;
+
+        const minSize = this.radius / 1.5;
+        const maxSize = this.radius * 1.5;
+        const depthFactor = 1 - (-end_point.z * 50 - (-focalLength/10)) / (2 * focalLength/10);
+
+        const adjustedSize = Math.min(Math.max(lerp(minSize, maxSize, depthFactor), minSize), maxSize);
       
         if (show_particles)
         {
@@ -266,8 +276,13 @@ class Particle
 
             context.beginPath()
             context.fillStyle = colour(hue, sat, this.z)
-            context.arc(Math.floor(end_x * scale + offsetX), 
-                        Math.floor(end_y * scale + offsetY), this.radius, 0, Math.PI * 2);
+            context.arc(
+                Math.floor(end_x * scale + offsetX),
+                Math.floor(end_y * scale + offsetY),
+                adjustedSize,
+                0,
+                Math.PI * 2
+              );
             context.fill()
         }
     }
@@ -283,6 +298,7 @@ var drawing = true;
 var generating = false;
 var first_init = true;
 var focalLength = 1000;
+var info = undefined;
 var resize_modifier = function() {}
 var generation = function() {}
 var attractor = function(x, y, z) {}
@@ -409,11 +425,17 @@ function init()
         return "hsl(" + hue + "," + sat + "%," + (Math.abs(z) + 50) + "%)"
     }
 
+    if (!first_init)
+    {
+        info.style.display = "none";
+        info.style.opacity = 0;
+    } 
+
     var infoString, start_x, start_y
     switch(state)
     {
         case 0: // Lorenz
-            infoString = "Lorenz Attractor<br> &nbsp dx/dt = σ(y - x)<br> &nbsp dy/dt = x(ρ - z) - y<br> &nbsp dz/dt = xy - zβ"
+            info = document.getElementById("lorenz-info");
 
             deltaX = 0
             deltaY = 0
@@ -480,7 +502,7 @@ function init()
             break   
 
         case 1: // Aizawa
-            infoString = "Aizawa Attractor<br> &nbsp dx/dt = x(z - β) - δy<br> &nbsp dy/dt = δx - y(z-β)<br> &nbsp dz/dt = γ + αz - z³/3 - (x² + y²)(1 + εz) + ζzx³"
+            info = document.getElementById("aizawa-info");
 
             num_particles = 60
 
@@ -582,7 +604,7 @@ function init()
             break
     
         case 2: // Thomas
-            infoString = "Thomas Attractor<br> &nbsp dx/dt = sin(y) - βx<br> &nbsp dy/dt = sin(z) - βy<br> &nbsp dz/dt = sin(x) - βz"
+            info = document.getElementById("thomas-info");
 
             //num_particles = 80
 
@@ -628,7 +650,7 @@ function init()
             }
             break
         case 3: // Dadras
-            infoString = "Dadras Attractor<br> &nbsp dx/dt = y - ax + byz<br> &nbsp dy/dt = cy - xz + z<br> &nbsp dz/dt = dxy-ez"
+            info = document.getElementById("dadras-info");
 
             num_particles = 80
 
@@ -684,17 +706,18 @@ function init()
 
     targetTransforms = originalTransforms
 
-    setTimeout(() => { 
-        gsap.to(info, {opacity: 1, duration: 2})
-        info.innerHTML = infoString
-
-        gsap.to(document.getElementById("axes"), {opacity: 1, duration: 2})
+    info.style.display = "";
+    setTimeout(() => 
+    { 
+        gsap.to(info_wrapper, {opacity: 1, duration: 2})
+        gsap.to(info, { opacity: 1, duration: 2,})
     }, 1500) // Fade in info
 
     generation()
 
     canvas.initialise()
-    if (first_init) {
+    if (first_init) 
+    {
         animate()
         first_init = false
     }
@@ -801,7 +824,8 @@ function clearup()
     //         }
     //     })
     // }
-    gsap.to(info, {opacity: 0, duration: 0.5})
+    gsap.to(info_wrapper, {opacity: 0, duration: 1})
+    setTimeout(() => { info.style.opacity = "0" }, 1005)
     particles = []
     drawing = true
 }
@@ -809,7 +833,6 @@ function clearup()
 var attractor_state = document.getElementById('attractor-state')
 attractor_state.addEventListener("change", function() 
 {
-    console.log(attractor_state.value)
     switch (attractor_state.value)
     {
         case "0":
@@ -838,24 +861,65 @@ attractor_state.addEventListener("change", function()
     }, 2000)
 })
 
-var show_particles = false
-var show_particles_state = document.getElementById('show-particles')
+var show_ui = true;
+const show_ui_el = document.getElementById('show-ui');
+show_ui_el.addEventListener("change", showUI)
+function showUI()
+{
+    show_ui = !show_ui
+
+    show_ui_el.value = show_ui ? "true" : "false"
+
+    const framerate = document.getElementById("framerate");
+    const attractor_info = document.getElementById("attractor-info");
+    const menu = document.getElementById("menu");
+    const menu_button = document.getElementById("menu-button");
+    const elements = [framerate, attractor_info, menu, menu_button]
+
+    if (show_ui)
+    {
+        elements.forEach(element => {
+            gsap.to(element, {opacity: 1, duration: 0.5})
+        })
+    } else {
+        elements.forEach(element => {
+            gsap.to(element, {opacity: 0, duration: 0.5})
+        })
+    }
+}
+
+document.addEventListener("keydown", (event) => 
+{
+    if ((event.key === "Escape" || event.key === "Esc" || event.keyCode === 27) && !show_ui)
+    {
+        showUI()
+    }
+})
+
+var show_strokes = true;
+const show_strokes_state = document.getElementById('show-strokes');
+show_strokes_state.addEventListener("change", function()
+{
+    show_strokes = !show_strokes
+})
+
+
+var show_particles = false;
+const show_particles_state = document.getElementById('show-particles');
 show_particles_state.addEventListener("change", function()
 {
     show_particles = !show_particles
 })
 
-var show_framerate = false
-var show_framerate_state = document.getElementById('show-framerate')
+var show_framerate = false;
+const show_framerate_state = document.getElementById('show-framerate');
 show_framerate_state.addEventListener("change", function()
 {
     show_framerate = !show_framerate
     if (show_framerate)
     {
         document.getElementById("framerate").style.display = "block"
-    }
-    else
-    {
+    } else {
         document.getElementById("framerate").style.display = "none"
     }
 })
@@ -865,8 +929,10 @@ var targetScale = 1;
 var scale = 1;
 var lerpAmount = 0.1; 
 
-document.addEventListener("wheel", function (e) {
-  targetScale -= e.deltaY / 2500;
+document.addEventListener("wheel", function (e) 
+{
+    const slowDown = 0.0007;
+    targetScale -= e.deltaY * slowDown;
 });
 
 function updateScale() {
@@ -896,13 +962,13 @@ var rotationY = 0;
 var rotationZ = 0;
 
 
-function getTranslation(canvasWidth, canvasHeight, scale) {
+function getTranslation(canvasWidth, canvasHeight, scale) 
+{
     offsetX = deltaX + (canvasWidth - canvasWidth * scale) / 2
     offsetY = deltaY + (canvasHeight - canvasHeight * scale) / 2
     return { offsetX, offsetY }
 }
 
-const body = document.getElementById("body")
 body.addEventListener("mousedown", function (e) 
 {
     if (e.button === 0) {
@@ -916,7 +982,8 @@ body.addEventListener("mousedown", function (e)
       }
 })
   
-body.addEventListener("mousemove", function (e) {
+body.addEventListener("mousemove", function (e) 
+{
     if (isDragging) {
       targetDeltaX += e.clientX - lastMousePosition.x;
       targetDeltaY += e.clientY - lastMousePosition.y;
@@ -935,7 +1002,8 @@ body.addEventListener("mousemove", function (e) {
     }
 });
 
-body.addEventListener("mouseup", function (e) {
+body.addEventListener("mouseup", function (e) 
+{
     if (e.button === 0) {
       isDragging = false;
     }
@@ -944,16 +1012,19 @@ body.addEventListener("mouseup", function (e) {
     }
 });
   
-body.addEventListener("mouseleave", function (e) {
+body.addEventListener("mouseleave", function (e) 
+{
     isDragging = false;
     isRightClick = false;
 })
 
-canvasEl.addEventListener('contextmenu', (e) => {
+canvasEl.addEventListener('contextmenu', (e) => 
+{
   e.preventDefault();
 });
 
-body.addEventListener('contextmenu', (e) => {
+body.addEventListener('contextmenu', (e) => 
+{
     e.preventDefault();
 });
 /* end mouse movement */
@@ -1006,29 +1077,7 @@ updateTranslationAndRotation();
 /* end rotation */
 
 /* utils */
-function lerp(start, end, amount) {
-    return start * (1 - amount) + end * amount;
-  }
-
-function lerpAxis(axisStart, axisEnd, t) {
-    let axis = {};
-    Object.keys(axisStart).forEach(key => {
-        axis[key] = lerp(axisStart[key], axisEnd[key], t);
-    });
-    return axis;
-}
-
-let transition = function() 
+function lerp(start, end, amount) 
 {
-    let elapsedTime = Date.now() - startTime;
-    let t = Math.min(1, elapsedTime / duration);
-    let axis = lerpAxis(axisStart, axisEnd, t);
-
-    let result = attractor(axis, x,y,z);
-
-    if (t < 1) {
-        requestAnimationFrame(transition);
-    } else {
-        console.log("Transition complete");
-    }
+    return start * (1 - amount) + end * amount;
 }

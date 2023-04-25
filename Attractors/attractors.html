@@ -1,14 +1,223 @@
 <html>
     <head>
         <link href="styles.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.js"></script>
         <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
     </head>
     <body id="body">
         <div id="framerate" style="display:none"></div>
         <div id="attractor-info">
-            
+            <div id="lorenz-info" style="display:none">
+                <math>
+                    <mtext>Lorenz Attractor</mtext>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dx</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>α</mi>
+                    <mo>(</mo>
+                    <mi>y</mi>
+                    <mo>-</mo>
+                    <mi>x</mi>
+                    <mo>)</mo>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dy</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>x</mi>
+                    <mo>(</mo>
+                    <mi>&#x3C1;</mi>
+                    <mo>-</mo>
+                    <mi>z</mi>
+                    <mo>)</mo>
+                    <mo>-</mo>
+                    <mi>y</mi>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dz</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>x</mi>
+                    <mi>y</mi>
+                    <mo>-</mo>
+                    <mi>z</mi>
+                    <mi>&#x3B2;</mi>
+                </math>
+            </div>
+            <div id="aizawa-info" style="display:none">
+                <math>
+                    <mtext>Aizawa Attractor</mtext>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dx</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>x</mi>
+                    <mo>(</mo>
+                    <mi>z</mi>
+                    <mo>-</mo>
+                    <mi>&#x3B2;</mi>
+                    <mo>)</mo>
+                    <mo>-</mo>
+                    <mi>δ</mi>
+                    <mi>y</mi>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dy</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>δ</mi>
+                    <mi>x</mi>
+                    <mo>-</mo>
+                    <mi>y</mi>
+                    <mo>(</mo>
+                    <mi>z</mi>
+                    <mo>-</mo>
+                    <mi>&#x3B2;</mi>
+                    <mo>)</mo>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dz</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>γ</mi><mo>+</mo><mi>α</mi><mi>z</mi><mo>−</mo><mfrac><msup><mi>z</mi><mn>3</mn></msup><mn>3</mn></mfrac><mo>−</mo><mo stretchy="false">(</mo><msup><mi>x</mi><mn>2</mn></msup><mo>+</mo><msup><mi>y</mi><mn>2</mn></msup><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mn>1</mn><mo>+</mo><mi>ϵ</mi><mi>z</mi><mo stretchy="false">)</mo><mo>+</mo><mi>ζ</mi><mi>z</mi><msup><mi>x</mi><mn>3</mn></msup>
+                </math>
+            </div>
+            <div id="thomas-info" style="display:none">
+                <math>
+                    <mtext>Thomas' Attractor</mtext>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dx</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>sin</mi>
+                    <mo>(</mo>
+                    <mi>y</mi>
+                    <mo>)</mo>
+                    <mo>-</mo>
+                    <mi>b</mi>
+                    <mi>x</mi>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dy</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>sin</mi>
+                    <mo>(</mo>
+                    <mi>z</mi>
+                    <mo>)</mo>
+                    <mo>-</mo>
+                    <mi>b</mi>
+                    <mi>y</mi>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dz</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>sin</mi>
+                    <mo>(</mo>
+                    <mi>x</mi>
+                    <mo>)</mo>
+                    <mo>-</mo>
+                    <mi>b</mi>
+                    <mi>z</mi>
+                </math>
+            </div>
+            <div id="dadras-info" style="display:none; opacity:0">
+                <math>
+                    <mtext>Dadras Attractor</mtext>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dx</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>y</mi>
+                    <mo>-</mo>
+                    <mi>a</mi>
+                    <mi>x</mi>
+                    <mo>+</mo>
+                    <mi>b</mi>
+                    <mi>y</mi>                   
+                    <mi>z</mi>
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dy</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>c</mi>
+                    <mo>+</mo>
+                    <mi>z</mi>
+                    <mo>(</mo>
+                    <mi>1</mi>
+                    <mo>-</mo>
+                    <mi>x</mi>
+                    <mo>)</mo>
+
+                </math>
+                <br>
+                <math>
+                    <mo>&#xA0;</mo>
+                    <mfrac>
+                        <mn>dz</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>d</mi>
+                    <mi>x</mi>
+                    <mi>y</mi>
+                    <mo>-</mo>
+                    <mi>e</mi>
+                    <mi>z</mi>
+                </math>
+            </div>
         </div>
+
         <div id="start-wrapper">
             <div id="start">Click to begin</div>
         </div>
@@ -41,10 +250,20 @@
             </div>
             <div class="menu-item-wrapper">
                 <div class="menu-item">
+                    <div>Show UI (press esc to unhide):</div>
+                    <select id="show-ui">
+                        <option value="false">No</option>
+                        <option selected value="true">Yes</option>
+                    </select>
                     <div>Show Particles:</div>
                     <select id="show-particles">
                         <option selected value="false">No</option>
                         <option value="true">Yes</option>
+                    </select>
+                    <div>Show Lines:</div>
+                    <select id="show-strokes">
+                        <option value="false">No</option>
+                        <option selected value="true">Yes</option>
                     </select>
                     <div>Show Framerate:</div>
                     <select id="show-framerate">
@@ -84,7 +303,7 @@
                 </div>
                 <div id="lorenz-variables" style="display: none">
                     <div class="menu-item">
-                        <div>σ:</div>
+                        <div>α:</div>
                         <input type="number" id="lorenz-alpha" value="10" step="0.1">
                     </div>
                     <div class="menu-item">
@@ -98,7 +317,7 @@
                 </div>
                 <div id="aizawa-variables" style="display: none">
                     <div class="menu-item">
-                        <div>σ:</div>
+                        <div>α:</div>
                         <input type="number" id="aizawa-alpha" value="0.80" step="0.05">
                     </div>
                     <div class="menu-item">
@@ -124,7 +343,7 @@
                 </div>
                 <div id="thomas-variables" style="display: none">
                     <div class="menu-item">
-                        <div>β:</div>
+                        <div>b:</div>
                         <input type="number" id="thomas-beta" value="0.208186" step="0.05">
                     </div>
                 </div>
