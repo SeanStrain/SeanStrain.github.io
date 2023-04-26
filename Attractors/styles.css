@@ -6,20 +6,22 @@
 :root
 {
     font-family: Arial, Helvetica, sans-serif; 
+    --white: #e6e6e9;
+    --black: #060608;
 }
 
 body
 {
     margin: 0;
     overflow: hidden;
-    background-color: black;
+    background-color: var(--black);
 }
 
 math
 {
     opacity: 1;
     font-family: Arial, Helvetica, sans-serif;
-    color: white;
+    color: var(--white);
     margin-bottom: 10px;
 }
 
@@ -35,7 +37,7 @@ math
 /* start */
 #start-wrapper
 {
-    color: azure;
+    color: var(--white);
     position: absolute;
     left: 25vw;
     right: 25vw;
@@ -78,7 +80,7 @@ math
 
 .toggle-menu > div
 {
-    color: whitesmoke;
+    color: var(--white);
     position: absolute;
     transform: translate(-140%, calc(-60px - 50%));
     transition: transform 0.5s ease;
@@ -96,7 +98,7 @@ math
     display: block;
     height: 2px;
     width: 26px;
-    background-color: azure;
+    background-color:  var(--white);
     transform: translateY(calc(-60px - 50%));
 }
 .toggle-menu > span.active
@@ -118,7 +120,7 @@ math
         height: 15px;
         width: 80px;
         right: 10px;
-        background-color: azure;
+        background-color:  var(--white)azure;
         transform: translateY(calc(-60px - 50%));
     }
     .toggle-menu > div
@@ -133,7 +135,7 @@ math
         border-radius: 15px;
         border: #242A33 2px solid;
         background-color: #242A33;
-        color: white;
+        color:  var(--white);
         margin: 15px;
         padding: 15px;
         right: 50vw;
@@ -148,7 +150,7 @@ math
     border-radius: 15px;
     border: #242A33 2px solid;
     background-color: #242A33;
-    color: white;
+    color:  var(--white);
     margin: 15px;
     padding: 15px;
     right: 0;
@@ -178,7 +180,7 @@ select
     position: absolute;
     top: 10px;
     left: 10px;
-    color: white;
+    color:  var(--white);
     padding: 5px;
     font-size: 1.5vmin;
 }

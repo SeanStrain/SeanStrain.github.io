@@ -148,7 +148,7 @@ class Canvas
     }
 }
 
-var canvasColour = `rbga(${0}, ${0}, ${0}, 0.005)`;
+var canvasColour = `rbga(${10}, ${10}, ${12}, 0.005)`;
 var canvas  = new Canvas(canvasEl, context, canvasColour, '0');
 context.lineWidth = 2;
 
