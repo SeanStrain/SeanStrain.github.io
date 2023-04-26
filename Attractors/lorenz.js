@@ -696,6 +696,8 @@ function init()
                 return axis;
             }
             break
+        case 4: // Dequan
+            break
     }
 
     let axes = ["x", "y", "z"]
@@ -812,18 +814,6 @@ addEventListener("click", (event) =>
 
 function clearup()
 {
-    //drawing = false
-    // while (strokes.length != 0)
-    // {
-    //     strokes.forEach((stroke, index) =>
-    //     {
-    //         stroke.draw()
-    //         if (stroke.alpha < stroke.minAlpha)
-    //         {
-    //             strokes.splice(index, 1)
-    //         }
-    //     })
-    // }
     gsap.to(info_wrapper, {opacity: 0, duration: 1})
     setTimeout(() => { info.style.opacity = "0" }, 1005)
     particles = []
@@ -833,25 +823,9 @@ function clearup()
 var attractor_state = document.getElementById('attractor-state')
 attractor_state.addEventListener("change", function() 
 {
-    switch (attractor_state.value)
-    {
-        case "0":
-            state = 0
-            clearup()
-            break
-        case "1":
-            state = 1
-            clearup()
-            break
-        case "2":
-            state = 2
-            clearup()
-            break
-        case "3":
-            state = 3
-            clearup()
-            break
-    }
+
+    state = parseInt(attractor_state.value)
+    clearup()
     generating = false
     setTimeout(() =>
     {
@@ -876,16 +850,10 @@ function showUI()
     const menu_button = document.getElementById("menu-button");
     const elements = [framerate, attractor_info, menu, menu_button]
 
-    if (show_ui)
-    {
-        elements.forEach(element => {
-            gsap.to(element, {opacity: 1, duration: 0.5})
-        })
-    } else {
-        elements.forEach(element => {
-            gsap.to(element, {opacity: 0, duration: 0.5})
-        })
-    }
+    const opacity = show_ui ? 1 : 0
+    elements.forEach(element => {
+        gsap.to(element, {opacity: opacity, duration: 0.5})
+    })
 }
 
 document.addEventListener("keydown", (event) => 
@@ -932,7 +900,7 @@ var lerpAmount = 0.1;
 document.addEventListener("wheel", function (e) 
 {
     const slowDown = 0.0007;
-    targetScale -= e.deltaY * slowDown;
+    targetScale -= e.deltaY * slowDown ;
 });
 
 function updateScale() {
