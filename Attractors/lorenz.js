@@ -256,12 +256,11 @@ class Particle
         const end_y = (end_point.y * focalLength) / (end_point.z + focalLength) * currentAttractor.size_modifier_y + midy;
 
         const radius = currentAttractor.getParticleRadius();
-        const minSize = radius / 1.5;
+        const minSize = radius;
         const maxSize = radius * 1.5;
         const depthFactor = 1 - (-end_point.z * 50 - (-focalLength/10)) / (2 * focalLength/10);
 
-        const adjustedSize = Math.min(Math.max(lerp(minSize, maxSize, depthFactor), minSize), maxSize);
-      
+        const adjustedSize = Math.max(Math.min(Math.max(lerp(minSize, maxSize, depthFactor), minSize), maxSize) * Math.max((scale - 1) / 4 * depthFactor, 0.5), minSize);
         if (show_particles)
         {
             var hue = Math.abs(end_x / 10)
@@ -354,7 +353,18 @@ function init()
             currentAttractor = new LorenzAttractor()
             break   
 
-        case 1: // Aizawa
+        case 1: // Lorenz83
+
+            deltaX = 0
+            deltaY = 0
+
+            start_x = 0
+            start_y = 0
+
+            currentAttractor = new Lorenz83Attractor()
+            break;
+
+        case 2: // Aizawa
 
             deltaX = 0
             deltaY = -100
@@ -365,7 +375,7 @@ function init()
             currentAttractor = new AizawaAttractor()
             break
     
-        case 2: // Thomas
+        case 3: // Thomas
 
             deltaX = 0
             deltaY = 0
@@ -376,7 +386,7 @@ function init()
             currentAttractor = new ThomasAttractor()
 
             break
-        case 3: // Dadras
+        case 4: // Dadras
 
             deltaX = 0;
             deltaY = 0;
@@ -386,7 +396,7 @@ function init()
 
             currentAttractor = new DadrasAttractor();
             break
-        case 4: 
+        case 5: 
 
             deltaX = 0;
             deltaY = 0;
@@ -482,8 +492,9 @@ addEventListener("resize", (event) =>
     canvasEl.width  = innerWidth
     canvasEl.height = innerHeight
 
-    currentAttractor.resize_modifier()
-
+    if (currentAttractor) {
+        currentAttractor.resize_modifier()
+    }
     midx = canvasEl.width  / 2
     midy = canvasEl.height / 2
 })
@@ -848,6 +859,68 @@ class LorenzAttractor extends Attractor
 }
 
 
+class Lorenz83Attractor extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        info = document.getElementById("lorenz83-info");
+        document.getElementById("lorenz83-variables").style.display = "";
+    }
+
+    getA() { return parseFloat(document.getElementById("lorenz83-a").value) }
+    getB() { return parseFloat(document.getElementById("lorenz83-b").value) }
+    getF() { return parseFloat(document.getElementById("lorenz83-f").value) }
+    getG() { return parseFloat(document.getElementById("lorenz83-g").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 20 * innerWidth
+        this.size_modifier_y = 1 / 20 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue - z * 3
+        const sat_ = sat
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let middle = 1.5
+            let particle = new Particle(-middle + i / 25, -middle + i / 25)
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    attractor(x, y, z) 
+    {
+        let framerate = super.getSpeedModifier() / 4 * 0.017;
+    
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+
+        temp['x'] = -this.getA() * axis['x'] + (axis['y'] * axis['y']) - (axis['z'] * axis['z']) + (this.getA() * this.getF());
+        temp['y'] = -axis['y'] + (axis['x'] * axis['y']) - this.getB() * axis['x'] * axis['z'] + this.getG();
+        temp['z'] = -axis['z'] + (this.getB() * axis['x'] * axis['y']) + (axis['x'] * axis['z']);
+
+        axis['x'] += temp['x'] * framerate;
+        axis['y'] += temp['y'] * framerate;
+        axis['z'] += temp['z'] * framerate;
+        return axis;
+    }
+}
+
+
 class AizawaAttractor extends Attractor
 {
     constructor()
@@ -1057,7 +1130,7 @@ class ChenAttractor extends Attractor
     }
 
     getAlpha() { return parseFloat(document.getElementById("chen-alpha").value) }
-    getBeta()  { return parseFloat(document.getElementById("chen-beta").value) }
+    getBeta() { return parseFloat(document.getElementById("chen-beta").value) }
     getDelta() { return parseFloat(document.getElementById("chen-delta").value) }
 
     getSizeModifier() { return this.resize_modifier() }
@@ -1081,14 +1154,6 @@ class ChenAttractor extends Attractor
         let x1 = 0;
         let y1 = 0;
         let z1 = -5;
-
-        // let x1 = 5;
-        // let y1 = 10;
-        // let z1 = 10;
-
-        // let x2 = -7;
-        // let y2 = -5;
-        // let z2 = -10;
 
         let x2 = 0;
         let y2 = 0;
