@@ -267,6 +267,11 @@
                     </mfrac>
                 </math>
             </div>
+            <div id="rossler-info" style="display:none">
+                <math>
+                    <mtext>Rössler Attractor</mtext>
+                </math>
+            </div>
             <div id="chua-info" style="display:none; opacity:0">
                 <math>
                     <mtext>Generalized Chua's Circuit</mtext>
@@ -565,6 +570,7 @@
                     <option value="3">Thomas</option>
                     <option value="5">Dadras</option>
                     <option value="5">Chen</option>
+                    <option value="6">Rössler</option>
                 </select>
             </div>
             <div class="menu-item-wrapper">
@@ -722,6 +728,20 @@
                     <div class="menu-item">
                         <div>δ</div>
                         <input type="number" id="chen-delta" value="-0.38" step="0.1">
+                    </div>
+                </div>
+                <div id="rossler-variables" style="display:none">
+                    <div class="menu-item">
+                        <div>a</div>
+                        <input type="number" id="rossler-a" value="0.2" step="0.1">
+                    </div>
+                    <div class="menu-item">
+                        <div>b</div>
+                        <input type="number" id="rossler-b" value="0.2" step="0.1">
+                    </div>
+                    <div class="menu-item">
+                        <div>c</div>
+                        <input type="number" id="rossler-c" value="5.7" step="0.1">
                     </div>
                 </div>
                 <div id="clifford-variables" style="display: none">

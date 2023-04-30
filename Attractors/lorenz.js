@@ -406,6 +406,16 @@ function init()
 
             currentAttractor = new ChenAttractor();
             break
+
+        case 6:
+
+            deltaX = 0;
+            deltaY = 0;
+
+            start_x = 0;
+            start_y = 0;
+
+            currentAttractor = new RosslerAttractor();
     }
 
     let axes = ["x", "y", "z"]
@@ -850,10 +860,15 @@ class LorenzAttractor extends Attractor
         let framerate = super.getSpeedModifier() / 2 * 0.017;
     
         let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
 
-        axis['x'] += (axis['x'] + (axis['y'] - axis['x']) * this.getAlpha()) * framerate
-        axis['y'] += (axis['x'] * (this.getRho() - axis['z']) - axis['y']) * framerate
-        axis['z'] += (axis['x'] * axis['y'] - this.getBeta() * axis['z']) * framerate
+        temp['x'] = axis['x'] + (axis['y'] - axis['x']) * this.getAlpha();
+        temp['y'] = axis['y'] + (axis['x'] * (this.getRho() - axis['z']) - axis['y']);
+        temp['z'] = axis['z'] + (axis['x'] * axis['y'] - this.getBeta() * axis['z']);
+
+        axis['x'] += temp['x'] * framerate;
+        axis['y'] += temp['y'] * framerate;
+        axis['z'] += temp['z'] * framerate;
         return axis;
     }
 }
@@ -1052,10 +1067,15 @@ class ThomasAttractor extends Attractor
         let framerate = super.getSpeedModifier() * 2.5 * 0.017;
     
         let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
 
-        axis['x'] += (Math.sin(axis['y']) - this.getBeta() * axis['x']) * framerate
-        axis['y'] += (Math.sin(axis['z']) - this.getBeta() * axis['y']) * framerate
-        axis['z'] += (Math.sin(axis['x']) - this.getBeta() * axis['z']) * framerate
+        temp['x'] = Math.sin(axis['y']) - this.getBeta() * axis['x'];
+        temp['y'] = Math.sin(axis['z']) - this.getBeta() * axis['y'];
+        temp['z'] = Math.sin(axis['x']) - this.getBeta() * axis['z'];
+
+        axis['x'] += temp['x'] * framerate
+        axis['y'] += temp['y'] * framerate
+        axis['z'] += temp['z'] * framerate
         return axis;
     }
 
@@ -1111,10 +1131,15 @@ class DadrasAttractor extends Attractor
         let framerate = super.getSpeedModifier() * 0.017;
     
         let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
 
-        axis['x'] += (axis['y'] - (this.getA() * axis['x']) + this.getB() * axis['y'] * axis['z']) * framerate;
-        axis['y'] += (this.getC() * axis['y'] - (axis['x'] * axis['z']) + axis['z']) * framerate;
-        axis['z'] += (this.getD() * axis['x'] * axis['y'] - this.getE() * axis['z']) * framerate;
+        temp['x'] = axis['y'] - (this.getA() * axis['x']) + this.getB() * axis['y'] * axis['z'];
+        temp['y'] = this.getC() * axis['y'] - (axis['x'] * axis['z']) + axis['z'];
+        temp['z'] = this.getD() * axis['x'] * axis['y'] - this.getE() * axis['z'];
+
+        axis['x'] += temp['x'] * framerate;
+        axis['y'] += temp['y'] * framerate;
+        axis['z'] += temp['z'] * framerate;
         return axis;
     }
 }
@@ -1197,6 +1222,66 @@ class ChenAttractor extends Attractor
         return axis;
     }
 
+}
+
+class RosslerAttractor extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        info = document.getElementById("rossler-info");
+        document.getElementById("rossler-variables").style.display = "";
+    }
+
+    getA() { return parseFloat(document.getElementById("rossler-a").value) }
+    getB() { return parseFloat(document.getElementById("rossler-b").value) }
+    getC() { return parseFloat(document.getElementById("rossler-c").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 5 * innerWidth
+        this.size_modifier_y = 1 / 5 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let middle = 1.5
+            let particle = new Particle(-middle + i / 25, -middle + i / 25)
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier() * 2 * 0.017;
+    
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+
+        temp['x'] = -axis['y'] - axis['z'];
+        temp['y'] = axis['x'] + this.getA() * axis['y'];
+        temp['z'] = this.getB() + axis['z'] * (axis['x'] - this.getC());
+
+        axis['x'] += (temp['x'] * framerate);
+        axis['y'] += (temp['y'] * framerate);
+        axis['z'] += (temp['z'] * framerate);
+        return axis;
+    }
 }
 
 // TODO:
