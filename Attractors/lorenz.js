@@ -168,7 +168,7 @@ class Stroke
 
         const hue = Math.abs(this.begin_point.x * 40 + total_ticks);
         const sat = Math.abs(this.begin_point.y * 40 + total_ticks);
-        this.colour = colour(hue, sat, this.z);
+        this.colour = currentAttractor.colour(hue, sat, this.z);
 
         this.new = true;
     }
@@ -188,11 +188,11 @@ class Stroke
         end_rotated = rotateY(end_rotated, rotationY);
         end_rotated = rotateZ(end_rotated, rotationZ);
       
-        const begin_x = (begin_rotated.x * focalLength) / (begin_rotated.z + focalLength) * size_modifier_x + midx;
-        const begin_y = (begin_rotated.y * focalLength) / (begin_rotated.z + focalLength) * size_modifier_y + midy;
+        const begin_x = (begin_rotated.x * focalLength) / (begin_rotated.z + focalLength) * currentAttractor.size_modifier_x + midx;
+        const begin_y = (begin_rotated.y * focalLength) / (begin_rotated.z + focalLength) * currentAttractor.size_modifier_y + midy;
       
-        const end_x = (end_rotated.x * focalLength) / (end_rotated.z + focalLength) * size_modifier_x + midx;
-        const end_y = (end_rotated.y * focalLength) / (end_rotated.z + focalLength) * size_modifier_y + midy;
+        const end_x = (end_rotated.x * focalLength) / (end_rotated.z + focalLength) * currentAttractor.size_modifier_x + midx;
+        const end_y = (end_rotated.y * focalLength) / (end_rotated.z + focalLength) * currentAttractor.size_modifier_y + midy;
     
         let { offsetX, offsetY } = getTranslation(innerWidth, innerHeight, scale);
     
@@ -215,20 +215,14 @@ class Stroke
 // PARTICLE:
 class Particle
 {
-    constructor(x, y, radius, context)
+    constructor(x, y, z = 0, type = 0)
     {
         this.x = x;
         this.y = y;
-        this.z = 0;
-
-        this.radius = radius;
-        this.base_radius = radius;
-
-        this.context = context;
+        this.z = z;
+        this.type = type;
 
         this.alpha = 1;
-
-        this.attractor = attractor;
     }
 
     draw()
@@ -239,7 +233,7 @@ class Particle
         var old_z = this.z;
 
         //let axis = { x: 1.0, y: 2.0, z: 3.0 };
-        var xyz = this.attractor(this.x, this.y, this.z)
+        var xyz = currentAttractor.attractor(this.x, this.y, this.z)
         this.x = xyz["x"];
         this.y = xyz["y"];
         this.z = xyz["z"];
@@ -258,11 +252,12 @@ class Particle
         end_point = rotateY(end_point, rotationY);
         end_point = rotateZ(end_point, rotationZ);
 
-        const end_x = (end_point.x * focalLength) / (end_point.z + focalLength) * size_modifier_x + midx;
-        const end_y = (end_point.y * focalLength) / (end_point.z + focalLength) * size_modifier_y + midy;
+        const end_x = (end_point.x * focalLength) / (end_point.z + focalLength) * currentAttractor.size_modifier_x + midx;
+        const end_y = (end_point.y * focalLength) / (end_point.z + focalLength) * currentAttractor.size_modifier_y + midy;
 
-        const minSize = this.radius / 1.5;
-        const maxSize = this.radius * 1.5;
+        const radius = currentAttractor.getParticleRadius();
+        const minSize = radius / 1.5;
+        const maxSize = radius * 1.5;
         const depthFactor = 1 - (-end_point.z * 50 - (-focalLength/10)) / (2 * focalLength/10);
 
         const adjustedSize = Math.min(Math.max(lerp(minSize, maxSize, depthFactor), minSize), maxSize);
@@ -275,7 +270,7 @@ class Particle
             let { offsetX, offsetY } = getTranslation(innerWidth, innerHeight, scale);
 
             context.beginPath()
-            context.fillStyle = colour(hue, sat, this.z)
+            context.fillStyle = currentAttractor.colour(hue, sat, this.z)
             context.arc(
                 Math.floor(end_x * scale + offsetX),
                 Math.floor(end_y * scale + offsetY),
@@ -289,37 +284,19 @@ class Particle
 }
 
 // FUNCTIONS:
+var currentAttractor;
 var particles = [];
 var strokes = [];
 var state;
-var size_modifier_x = 1;
-var size_modifier_y = 1;
 var drawing = true;
 var generating = false;
 var first_init = true;
 var focalLength = 1000;
 var info = undefined;
-var resize_modifier = function() {}
-var generation = function() {}
-var attractor = function(x, y, z) {}
 function init()
 {
 
     state = parseFloat(document.getElementById("attractor-state").value)
-
-    var num_particles = 80
-    var particle_radius = 4
-
-    isMobile = function() {
-        let check = false;
-        (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
-        return check;
-    };
-    if (isMobile())
-    {
-        num_particles = 30
-        particle_radius = 3
-    }
 
     document.getElementById("menu-button").classList.add("visible")
     var spans = [document.getElementById("menu-1"), document.getElementById("menu-2"), document.getElementById("menu-3")]
@@ -350,63 +327,6 @@ function init()
         })
     }
 
-    var axis1, axis2, axis3
-    const targetXTransform = {"rotate3D": "(0, 0, 1, 90deg)", "translate": "(22px, -28px)"}
-    const targetYTransform = {"rotate3D": "(0, 0, 0, 0deg)", "translate": "(0, 0)"}
-    const targetZTransform = {"rotate3D": "(1, 0, 0, 90deg)", "translate": "(0, 0)"}
-    const originalTransforms = [targetXTransform, targetYTransform, targetZTransform]
-    var targetTransforms = [targetXTransform, targetYTransform, targetZTransform]
-    function updateAxis(axisIndex, newValue) 
-    {
-        let axes = ["x", "y", "z"]
-
-        console.log(axisIndex, newValue);
-        let axisValues = [axis1, axis2, axis3];
-        let oldValue = axisValues[axisIndex];
-      
-        if (newValue === oldValue) {
-          return;
-        }
-      
-        let duplicateIndex = axisValues.findIndex((value) => value === newValue);
-        if (duplicateIndex >= 0) {
-            axisValues[duplicateIndex] = oldValue;
-            document.getElementById(`axis-${duplicateIndex + 1}`).value = oldValue;
-
-            gsap.to(document.getElementById(`${axes[duplicateIndex]}-axis`), {
-            transform: `rotate3d${targetTransforms[axisIndex]['rotate3D']} translate${targetTransforms[axisIndex]['translate']}`,
-            duration: 0.5,
-            });
-            gsap.to(document.getElementById(`${axes[axisIndex]}-axis`), {
-            transform: `rotate3d${targetTransforms[duplicateIndex]['rotate3D']} translate${targetTransforms[duplicateIndex]['translate']}`,
-            duration: 0.5,
-            });
-
-            let temp = targetTransforms[axisIndex]
-            targetTransforms[axisIndex] = targetTransforms[duplicateIndex]
-            targetTransforms[duplicateIndex] = temp
-
-        }
-      
-        axisValues[axisIndex] = newValue;
-        [axis1, axis2, axis3] = axisValues;
-    }
-
-    document.getElementById("axis-1").addEventListener("input", function() {
-        let newValue = String(document.getElementById("axis-1").value);
-        updateAxis(0, newValue);
-      });
-      
-      document.getElementById("axis-2").addEventListener("input", function() {
-        let newValue = String(document.getElementById("axis-2").value);
-        updateAxis(1, newValue);
-      });
-      
-      document.getElementById("axis-3").addEventListener("input", function() {
-        let newValue = String(document.getElementById("axis-3").value);
-        updateAxis(2, newValue);
-      });
-
     axis1 = "x"
     document.getElementById(`axis-1`).value = 'x';
     axis2 = "y"
@@ -414,289 +334,67 @@ function init()
     axis3 = "z"
     document.getElementById(`axis-3`).value = 'z';
 
-    var speed_modifier = 1
-    document.getElementById("speed").addEventListener("input", function()
-    {
-        speed_modifier = parseFloat(document.getElementById("speed").value)
-    })
-
-    var colourFunction = function(hue, sat, z)
-    {
-        return "hsl(" + hue + "," + sat + "%," + (Math.abs(z) + 50) + "%)"
-    }
-
     if (!first_init)
     {
         info.style.display = "none";
         info.style.opacity = 0;
     } 
 
-    var infoString, start_x, start_y
+    var start_x, start_y
     switch(state)
     {
         case 0: // Lorenz
-            info = document.getElementById("lorenz-info");
 
             deltaX = 0
             deltaY = 0
 
-            var alpha, beta, rho
-
-            document.getElementById("lorenz-variables").style.display = ""
-            document.getElementById("lorenz-alpha").addEventListener("input", function()
-            {
-                alpha = parseFloat(document.getElementById("lorenz-alpha").value)
-            })
-            document.getElementById("lorenz-beta").addEventListener("input", function()
-            {
-                beta = parseFloat(document.getElementById("lorenz-beta").value)
-            })
-            document.getElementById("lorenz-rho").addEventListener("input", function()
-            {
-                rho = parseFloat(document.getElementById("lorenz-rho").value)
-            })
-
-            alpha = 10
-            beta = 2.7
-            rho = 28
-
             start_x = 0
             start_y = 0
 
-            resize_modifier = function()
-            {
-                size_modifier_x = innerWidth / 45
-                size_modifier_y = innerHeight / 60
-            }
-            resize_modifier()
-
-            colour = function(hue, sat, z)
-            {
-                let hue_ = hue / 10
-                let sat_ = sat / 10
-                return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
-            }
-
-            generation = function()
-            {
-                generating = true
-                for (var i = 1; i < num_particles; i += 1)
-                {
-                    let middle = 1.5
-                    let particle = new Particle(-middle + i / 25, -middle + i / 25, particle_radius)
-                    particles.push(particle)
-                }
-                generating = false
-            }
-
-            attractor = function(x, y, z) {
-                framerate = speed_modifier / 2 * 0.017;
-            
-                let axis = { "x": x, "y": y, "z": z }
-
-                axis[axis1] += (axis[axis1] + (axis[axis2] - axis[axis1]) * alpha) * framerate
-                axis[axis2] += (axis[axis1] * (rho - axis[axis3]) - axis[axis2]) * framerate
-                axis[axis3] += (axis[axis1] * axis[axis2] - beta * axis[axis3]) * framerate
-                return axis;
-            }
+            currentAttractor = new LorenzAttractor()
             break   
 
         case 1: // Aizawa
-            info = document.getElementById("aizawa-info");
-
-            num_particles = 60
-
-            var alpha = 0.8
-            var beta = 0.7
-            var gamma = 0.65
-            var delta = 3.5
-            var epsilon = 0.25
-            var zeta = 0.1
 
             deltaX = 0
             deltaY = -100
 
-            document.getElementById("aizawa-variables").style.display = ""
-            document.getElementById("aizawa-alpha").addEventListener("input", function()
-            {
-                alpha = parseFloat(document.getElementById("aizawa-alpha").value)
-            })
-            document.getElementById("aizawa-beta").addEventListener("input", function()
-            {
-                beta = parseFloat(document.getElementById("aizawa-beta").value)
-            })
-            document.getElementById("aizawa-gamma").addEventListener("input", function()
-            {
-                gamma = parseFloat(document.getElementById("aizawa-gamma").value)
-            })
-            document.getElementById("aizawa-delta").addEventListener("input", function()
-            {
-                delta = parseFloat(document.getElementById("aizawa-delta").value)
-            })
-            document.getElementById("aizawa-epsilon").addEventListener("input", function()
-            {
-                epsilon = parseFloat(document.getElementById("aizawa-epsilon").value)
-            })
-            document.getElementById("aizawa-zeta").addEventListener("input", function()
-            {
-                zeta = parseFloat(document.getElementById("aizawa-zeta").value)
-            })
-    
             start_x = 0
             start_y = midy
 
-            resize_modifier = function()
-            {
-                size_modifier_x = 0.25 * innerHeight
-                size_modifier_y = 0.25 * innerHeight
-            }
-            resize_modifier()
-
-            colour = function(hue, sat, z)
-            {
-                return "hsl(" + hue + "," + sat + "%," + 50 + "%)"
-            }
-
-            generation = function()
-            {
-                generating = true
-                j = num_particles
-                i = - j / 2
-                const interval = setInterval(() =>
-                {
-                    var particle = new Particle(1 + i / 50, 0, particle_radius, context)
-                    particles.push(particle)
-                    i += 1
-                    if (j > 0) { j -= 1 }
-                    if (j == 0 || generating === false) { 
-                        particles.pop()
-                        generating = false
-                        clearInterval(interval) 
-                    }
-                }, 75)
-                
-            }
-
-            attractor = function(x, y, z)
-            {
-                framerate = speed_modifier / 30
-
-                let axis = { "x": x, "y": y, "z": z }
-                let temp = {}
-            
-                temp[axis1] = axis[axis1]
-                temp[axis2] = axis[axis2] + (axis[axis2] < 0 ? -1 : 1) * Math.random() * 0.001
-                temp[axis3] = axis[axis3]
-            
-                temp[axis3] += (((axis[axis2] - beta) * axis[axis3]) - (delta * axis[axis1])) * framerate
-                temp[axis1] += ((delta * axis[axis3]) + (axis[axis2] - beta) * axis[axis1]) * framerate
-            
-                let z1 = (gamma + (alpha * axis[axis2]) - Math.pow(axis[axis2], 3.0) / 3.0 - (Math.pow(axis[axis3], 2.0) + Math.pow(axis[axis1], 2.0)))
-                let z2 = (1 + epsilon * axis[axis2]) + (zeta * axis[axis2] * Math.pow(axis[axis3], 3.0))
-            
-                temp[axis2] += z1 * z2 * framerate
-            
-                axis[axis3] = temp[axis3] + Math.random() * 0.0001
-                axis[axis1] = temp[axis1] + (temp[axis1] < 0 ? -1 : 1) * Math.random() * 0.0001
-                axis[axis2] = temp[axis2] + Math.random() * 0.0001            
-                return axis
-            }
+            currentAttractor = new AizawaAttractor()
             break
     
         case 2: // Thomas
-            info = document.getElementById("thomas-info");
 
-            //num_particles = 80
+            deltaX = 0
+            deltaY = 0
 
-            var beta = 0.208186
-            document.getElementById("thomas-variables").style.display = ""
-            document.getElementById("thomas-beta").addEventListener("input", function()
-            {
-                beta = parseFloat(document.getElementById("thomas-beta").value)
-            })
+            start_x = 0
+            start_y = 0
 
-            resize_modifier = function()
-            {
-                size_modifier_x = 1 / 9 * innerWidth
-                size_modifier_y = 1 / 9 * innerHeight
-            }
-            resize_modifier()
+            currentAttractor = new ThomasAttractor()
 
-            colour = function(hue, sat, z)
-            {
-                return "hsl(" + hue + "," + sat + "%," + 50 + "%)"
-            }
-
-            generation = function()
-            {
-                generating = true
-                for (var i = 1; i < num_particles; i += 1)
-                {
-                    let middle = 1.5
-                    let particle = new Particle(-middle + i / 25, -middle + i / 25, particle_radius)
-                    particles.push(particle)
-                }
-                generating = false
-            }
-
-            attractor = function(x, y, z)
-            {
-                framerate = speed_modifier / 10;
-                let axis = { "x": x, "y": y, "z": z };
-                axis[axis1] += (Math.sin(axis[axis2]) - (beta * axis[axis1])) * framerate;
-                axis[axis2] += (Math.sin(axis[axis3]) - (beta * axis[axis2])) * framerate;
-                axis[axis3] += (Math.sin(axis[axis1]) - (beta * axis[axis3])) * framerate;
-                return axis;
-            }
             break
         case 3: // Dadras
-            info = document.getElementById("dadras-info");
 
-            num_particles = 80
+            deltaX = 0;
+            deltaY = 0;
 
-            var a = 3.0
-            var b = 2.7
-            var c = 1.7
-            var d = 2.0
-            var e = 9.0
+            start_x = 0;
+            start_y = 0;
 
-            resize_modifier = function()
-            {
-                size_modifier_x = 1 / 20 * innerWidth
-                size_modifier_y = 1 / 20 * innerHeight
-            }
-            resize_modifier()
-
-            colour = function(hue, sat, z)
-            {
-                let hue_ = hue / 5
-                let sat_ = sat / 5
-                return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
-            }
-
-            generation = function()
-            {
-                generating = true
-                for (var i = 1; i < num_particles; i += 1)
-                {
-                    let middle = 1.5
-                    let particle = new Particle(-middle + i / 25, -middle + i / 25, particle_radius)
-                    particles.push(particle)
-                }
-                generating = false
-            }
-
-            attractor = function(x, y, z)
-            {
-                framerate = speed_modifier / 50;
-                let axis = { "x": x, "y": y, "z": z };
-                axis[axis1] += (axis[axis2] - (a * axis[axis1]) + b * axis[axis2] * axis[axis3]) * framerate;
-                axis[axis2] += (c * axis[axis2] - (axis[axis1] * axis[axis3]) + axis[axis3]) * framerate;
-                axis[axis3] += (d * axis[axis1] * axis[axis2] - e * axis[axis3]) * framerate;
-                return axis;
-            }
+            currentAttractor = new DadrasAttractor();
             break
-        case 4: // Dequan
+        case 4: 
+
+            deltaX = 0;
+            deltaY = 0;
+
+            start_x = 0;
+            start_y = 0;
+
+            currentAttractor = new ChenAttractor();
             break
     }
 
@@ -706,8 +404,6 @@ function init()
         gsap.to(document.getElementById(`${axes[i]}-axis`), {transform: "", duration: 0.5})
     }
 
-    targetTransforms = originalTransforms
-
     info.style.display = "";
     setTimeout(() => 
     { 
@@ -715,7 +411,9 @@ function init()
         gsap.to(info, { opacity: 1, duration: 2,})
     }, 1500) // Fade in info
 
-    generation()
+    currentAttractor.resize_modifier()
+    currentAttractor.generation()
+
 
     canvas.initialise()
     if (first_init) 
@@ -731,6 +429,7 @@ var fps = 60
 var lastFps = 0
 function animate()
 {
+
     if (drawing === false) { 
         total_ticks = 0
         ticks = 0
@@ -772,6 +471,8 @@ function animate()
         document.getElementById("framerate").innerHTML = fps
     }
 
+    debugParticles()
+
     total_ticks += 1;
     ticks += 1;
 }
@@ -781,7 +482,7 @@ addEventListener("resize", (event) =>
     canvasEl.width  = innerWidth
     canvasEl.height = innerHeight
 
-    resize_modifier()
+    currentAttractor.resize_modifier()
 
     midx = canvasEl.width  / 2
     midy = canvasEl.height / 2
@@ -797,7 +498,7 @@ addEventListener("click", (event) =>
         var audio = new Audio('Jeux.mp3');
         //audio.play();
 
-        gsap.to(document.getElementById("start"),
+        gsap.to(document.getElementById("start-wrapper"),
         {
             color: "transparent",
             //transform: `translate(0, -140%)`,
@@ -835,6 +536,8 @@ attractor_state.addEventListener("change", function()
     }, 2000)
 })
 
+
+// toggle UI elements
 var show_ui = true;
 const show_ui_el = document.getElementById('show-ui');
 show_ui_el.addEventListener("change", showUI)
@@ -864,6 +567,8 @@ document.addEventListener("keydown", (event) =>
     }
 })
 
+
+// UI menu options
 var show_strokes = true;
 const show_strokes_state = document.getElementById('show-strokes');
 show_strokes_state.addEventListener("change", function()
@@ -892,7 +597,7 @@ show_framerate_state.addEventListener("change", function()
     }
 })
 
-/* mouse movement */
+// mouse movement
 var targetScale = 1;
 var scale = 1;
 var lerpAmount = 0.1; 
@@ -928,14 +633,6 @@ var targetRotationY = 0;
 var rotationX = 0;
 var rotationY = 0;
 var rotationZ = 0;
-
-
-function getTranslation(canvasWidth, canvasHeight, scale) 
-{
-    offsetX = deltaX + (canvasWidth - canvasWidth * scale) / 2
-    offsetY = deltaY + (canvasHeight - canvasHeight * scale) / 2
-    return { offsetX, offsetY }
-}
 
 body.addEventListener("mousedown", function (e) 
 {
@@ -1039,13 +736,553 @@ function updateTranslationAndRotation() {
   
     requestAnimationFrame(updateTranslationAndRotation);
 }
-  
 updateTranslationAndRotation();
 
+function getTranslation(canvasWidth, canvasHeight, scale) 
+{
+    offsetX = deltaX + (canvasWidth - canvasWidth * scale) / 2
+    offsetY = deltaY + (canvasHeight - canvasHeight * scale) / 2
+    return { offsetX, offsetY }
+}
 /* end rotation */
 
 /* utils */
 function lerp(start, end, amount) 
 {
     return start * (1 - amount) + end * amount;
+}
+
+isMobile = function() 
+{
+    let check = false;
+    (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
+    return check;
+};
+/* end utils */
+
+/* debugging functions */
+var debug = false;
+function debugParticles()
+{
+    const debugStep = 20;
+    if (debug)
+    {
+        for (let i = 0; i < particles.length; i++)
+        {
+            if (i % debugStep === 0)
+            {
+                console.log(particles[i].x, particles[i].y, particles[i].z, particles[i].type)
+            }
+        }
+    }
+}
+/* end debugging functions */
+
+class Attractor
+{
+    constructor()
+    {
+
+    }
+
+    getSpeedModifier() { return parseFloat(document.getElementById("speed").value) }
+    getNumParticles() { return parseInt(document.getElementById("particles").value) }
+    getParticleRadius() { return parseFloat(document.getElementById("radius").value) }
+}
+
+
+class LorenzAttractor extends Attractor
+{
+    constructor()
+    {
+        super()
+
+        info = document.getElementById("lorenz-info");
+        document.getElementById("lorenz-variables").style.display = "";
+    }
+
+    getAlpha() { return parseFloat(document.getElementById("lorenz-alpha").value) }
+    getBeta() { return parseFloat(document.getElementById("lorenz-beta").value) }
+    getRho() { return parseFloat(document.getElementById("lorenz-rho").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+
+    resize_modifier()
+    {
+        this.size_modifier_x = innerWidth / 40
+        this.size_modifier_y = innerHeight / 60
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 10
+        const sat_ = sat / 10
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let middle = 1.5
+            let particle = new Particle(-middle + i / 25, -middle + i / 25)
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    attractor(x, y, z) 
+    {
+        let framerate = super.getSpeedModifier() / 2 * 0.017;
+    
+        let axis = { "x": x, "y": y, "z": z }
+
+        axis['x'] += (axis['x'] + (axis['y'] - axis['x']) * this.getAlpha()) * framerate
+        axis['y'] += (axis['x'] * (this.getRho() - axis['z']) - axis['y']) * framerate
+        axis['z'] += (axis['x'] * axis['y'] - this.getBeta() * axis['z']) * framerate
+        return axis;
+    }
+}
+
+
+class AizawaAttractor extends Attractor
+{
+    constructor()
+    {
+        super()
+
+        info = document.getElementById("aizawa-info");
+        document.getElementById("aizawa-variables").style.display = "";
+    }
+
+    getAlpha() { return parseFloat(document.getElementById("aizawa-alpha").value) }
+    getBeta() { return parseFloat(document.getElementById("aizawa-beta").value) }
+    getGamma() { return parseFloat(document.getElementById("aizawa-gamma").value) }
+    getDelta() { return parseFloat(document.getElementById("aizawa-delta").value) }
+    getEpsilon() { return parseFloat(document.getElementById("aizawa-epsilon").value) }
+    getZeta() { return parseFloat(document.getElementById("aizawa-zeta").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 0.25 * innerHeight
+        this.size_modifier_y = 0.25 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue
+        const sat_ = sat
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        generating = true
+        let j = super.getNumParticles()
+        let i = - j / 2
+        const interval = setInterval(() =>
+        {
+            var particle = new Particle(1 + i / 50, 0)
+            particles.push(particle)
+            i += 1
+            if (j > 0) { j -= 1 }
+            if (j == 0 || generating === false) { 
+                particles.pop()
+                generating = false
+                clearInterval(interval) 
+            }
+        }, 75)
+    }
+
+    attractor(x, y, z) 
+    {
+        let framerate = super.getSpeedModifier() / 30
+
+        let delta = this.getDelta()
+        let epsilon = this.getEpsilon()
+        let zeta = this.getZeta()
+        let alpha = this.getAlpha()
+        let beta = this.getBeta()
+        let gamma = this.getGamma()
+
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+    
+        temp['x'] = axis['x']
+        temp['y'] = axis['y'] + (axis['y'] < 0 ? -1 : 1) * Math.random() * 0.001
+        temp['z'] = axis['z']
+    
+        temp['z'] += (((axis['y'] - beta) * axis['z']) - (delta * axis['x'])) * framerate
+        temp['x'] += ((delta * axis['z']) + (axis['y'] - beta) * axis['x']) * framerate
+    
+        let z1 = (gamma + (alpha * axis['y']) - Math.pow(axis['y'], 3.0) / 3.0 - (Math.pow(axis['z'], 2.0) + Math.pow(axis['x'], 2.0)))
+        let z2 = (1 + epsilon * axis['y']) + (zeta * axis['y'] * Math.pow(axis[axis3], 3.0))
+    
+        temp['y'] += z1 * z2 * framerate
+    
+        axis['z'] = temp['z'] + Math.random() * 0.0001
+        axis['x'] = temp['x'] + (temp['x'] < 0 ? -1 : 1) * Math.random() * 0.0001
+        axis['y'] = temp['y'] + Math.random() * 0.0001            
+        return axis
+    }
+}
+
+
+class ThomasAttractor extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        info = document.getElementById("thomas-info");
+        document.getElementById("thomas-variables").style.display = "";
+    }
+
+    getBeta() { return parseFloat(document.getElementById("thomas-beta").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 9 * innerWidth
+        this.size_modifier_y = 1 / 9 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue
+        const sat_ = sat
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let middle = 1.5
+            let particle = new Particle(-middle + i / 25, -middle + i / 25)
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier() * 2.5 * 0.017;
+    
+        let axis = { "x": x, "y": y, "z": z }
+
+        axis['x'] += (Math.sin(axis['y']) - this.getBeta() * axis['x']) * framerate
+        axis['y'] += (Math.sin(axis['z']) - this.getBeta() * axis['y']) * framerate
+        axis['z'] += (Math.sin(axis['x']) - this.getBeta() * axis['z']) * framerate
+        return axis;
+    }
+
+    
+}
+
+class DadrasAttractor extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        info = document.getElementById("dadras-info");
+        document.getElementById("dadras-variables").style.display = "";
+    }
+
+    getA() { return parseFloat(document.getElementById("dadras-a").value) }
+    getB() { return parseFloat(document.getElementById("dadras-b").value) }
+    getC() { return parseFloat(document.getElementById("dadras-c").value) }
+    getD() { return parseFloat(document.getElementById("dadras-d").value) }
+    getE() { return parseFloat(document.getElementById("dadras-e").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 20 * innerWidth
+        this.size_modifier_y = 1 / 20 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let middle = 1.5
+            let particle = new Particle(-middle + i / 25, -middle + i / 25)
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier() * 0.017;
+    
+        let axis = { "x": x, "y": y, "z": z }
+
+        axis['x'] += (axis['y'] - (this.getA() * axis['x']) + this.getB() * axis['y'] * axis['z']) * framerate;
+        axis['y'] += (this.getC() * axis['y'] - (axis['x'] * axis['z']) + axis['z']) * framerate;
+        axis['z'] += (this.getD() * axis['x'] * axis['y'] - this.getE() * axis['z']) * framerate;
+        return axis;
+    }
+}
+
+class ChenAttractor extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        info = document.getElementById("chen-info");
+        document.getElementById("chen-variables").style.display = "";
+    }
+
+    getAlpha() { return parseFloat(document.getElementById("chen-alpha").value) }
+    getBeta()  { return parseFloat(document.getElementById("chen-beta").value) }
+    getDelta() { return parseFloat(document.getElementById("chen-delta").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 40 * innerWidth
+        this.size_modifier_y = 1 / 40 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5 - z * 3
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        let x1 = 0;
+        let y1 = 0;
+        let z1 = -5;
+
+        // let x1 = 5;
+        // let y1 = 10;
+        // let z1 = 10;
+
+        // let x2 = -7;
+        // let y2 = -5;
+        // let z2 = -10;
+
+        let x2 = 0;
+        let y2 = 0;
+        let z2 = 5;
+
+        let iteration1 = Math.floor(super.getNumParticles() / 2);
+
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let sign = Math.random() > 0.5 ? 1 : -1;
+            let rand = sign *  Math.random() * 0.1;
+            let particle;
+            if (i < iteration1)
+            {
+                particle = new Particle(x1 + rand, y1 + rand, z1 + rand, 1);
+                particles.push(particle)
+            } else {
+                particle = new Particle(x2 + rand, y2 + rand, z2 + rand, 2);
+                particles.push(particle)
+            }
+            
+        }
+        generating = false
+    }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier() / 4 * 0.017;
+    
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+
+        temp['x'] = this.getAlpha() * axis['x'] - axis['y'] * axis['z'];
+        temp['y'] = this.getBeta() * axis['y'] + axis['x'] * axis['z'];
+        temp['z'] = this.getDelta() * axis['z'] + axis['x'] * axis['y'] / 3;
+
+        axis['x'] += (temp['x'] * framerate);
+        axis['y'] += (temp['y'] * framerate);
+        axis['z'] += (temp['z'] * framerate);
+        return axis;
+    }
+
+}
+
+// TODO:
+class GeneralisedChuaCircuit extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        info = document.getElementById("chua-info");
+        document.getElementById("chua-variables").style.display = "";
+    }
+
+    getAlpha()  { return parseFloat(document.getElementById("chua-alpha").value) }
+    getBeta()   { return parseFloat(document.getElementById("chua-beta").value) }
+    getGamma()  { return parseFloat(document.getElementById("chua-gamma").value) }
+    getMZero()  { return parseFloat(document.getElementById("chua-m-zero").value) }
+    getMOne()   { return parseFloat(document.getElementById("chua-m-one").value) }
+    getMTwo()   { return parseFloat(document.getElementById("chua-m-two").value) }
+    getMThree() { return parseFloat(document.getElementById("chua-m-three").value) }
+    getMFour()  { return parseFloat(document.getElementById("chua-m-four").value) }
+    getBOne()   { return parseFloat(document.getElementById("chua-b-one").value) }
+    getBTwo()   { return parseFloat(document.getElementById("chua-b-two").value) }
+    getBThree() { return parseFloat(document.getElementById("chua-b-three").value) }
+    getBFour()  { return parseFloat(document.getElementById("chua-b-four").value) }
+    getBFive()  { return parseFloat(document.getElementById("chua-b-five").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 * innerWidth
+        this.size_modifier_y = 1 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let middle = 0
+            let particle = new Particle(-middle + i / 500, -middle + i / 500)
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    attractor(x, y, z)
+    {
+
+        let framerate = super.getSpeedModifier() / 50 * 0.017;
+    
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {};
+
+        temp['x'] = (axis['x'] + this.getAlpha() * (axis['y'] - this.h(axis['x']))) * framerate;
+        temp['y'] = (axis['x'] - axis['y'] + axis['z']) * framerate;
+        temp['z'] = ((-this.getBeta() * axis['y'] - this.getGamma() * axis['z'])) * framerate;
+
+        axis['x'] += temp['x'];
+        axis['y'] += temp['y'];
+        axis['z'] += temp['z'];
+        
+        return axis;
+    }
+
+    h(x)
+    {
+        let exprOne = this.getMFour() * x;
+        let exprTwo = 0;
+
+        let ms = [this.getMOne(), this.getMTwo(), this.getMThree(), this.getMFour()];
+        let bs = [this.getBOne(), this.getBTwo(), this.getBThree(), this.getBFour(), this.getBFive()];
+
+        for (var i = 1; i < 4; i++)
+        {
+            exprTwo += (ms[i-1] - ms[i]) * (Math.abs(x + bs[i-1]) - Math.abs(x - bs[i-1]));
+        }
+        
+        return exprOne + 0.5 * exprTwo;
+    }
+
+}
+
+
+class CliffordAttractor extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        info = document.getElementById("clifford-info");
+        document.getElementById("clifford-variables").style.display = "";
+    }
+
+    getA() { return parseFloat(document.getElementById("clifford-a").value) }
+    getB() { return parseFloat(document.getElementById("clifford-b").value) }
+    getC() { return parseFloat(document.getElementById("clifford-c").value) }
+    getD() { return parseFloat(document.getElementById("clifford-d").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 * innerWidth
+        this.size_modifier_y = 1 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let middle = 1.5
+            let particle = new Particle(-middle + i / 25, -middle + i / 25)
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier();
+
+        let delta_t = 0.1;
+    
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+
+        let x_plus_one = (Math.sin(this.getA() * axis['y']) + this.getC() * Math.cos(this.getA() * axis['x'])) + (Math.random() * 0.001);
+        let y_plus_one = (Math.sin(this.getB() * axis['x']) + this.getD() * Math.cos(this.getB() * axis['y'])) + (Math.random() * 0.001);
+
+        axis['x'] = (x + (x_plus_one * delta_t)) * framerate;
+        axis['y'] = (y + (y_plus_one * delta_t)) * framerate;
+        axis['z'] = 1
+        return axis;
+    }
 }

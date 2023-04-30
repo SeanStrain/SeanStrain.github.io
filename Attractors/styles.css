@@ -37,12 +37,15 @@ math
 /* start */
 #start-wrapper
 {
+    display: flex;
+    flex-direction: column;
     color: var(--white);
     position: absolute;
     left: 25vw;
     right: 25vw;
     top: calc(50% - 2vh);
-    display: flex;
+    text-align: center;
+    user-select: none;
     overflow: hidden;
 }
 
@@ -51,9 +54,6 @@ math
     height: 100%;
     width: 100%;
     font-size: 8vmin;
-    text-align: center;
-    user-select: none;
-    will-change: transform;
 }
 /* end start */
 
