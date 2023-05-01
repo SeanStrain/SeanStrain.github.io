@@ -1,8 +1,17 @@
+/* TODO:
+
+more attractors
+fix particles
+perspective / cinematic camera
+user input for colours
+
+*/
+
 // GLOBALS:
-const info_wrapper = document.getElementById("attractor-info");
 const canvasEl  = document.querySelector('canvas');
 const context   = canvasEl.getContext('2d');
 const body = document.getElementById("body");
+const info_wrapper = document.getElementById("attractor-info");
 
 canvasEl.width  = innerWidth;
 canvasEl.height = innerHeight;
@@ -150,7 +159,6 @@ class Canvas
 
 var canvasColour = `rbga(${10}, ${10}, ${12}, 0.005)`;
 var canvas  = new Canvas(canvasEl, context, canvasColour, '0');
-context.lineWidth = 2;
 
 // STROKE:
 var colour = function() {}
@@ -283,18 +291,17 @@ class Particle
 }
 
 // FUNCTIONS:
-var currentAttractor;
-var particles = [];
-var strokes = [];
-var state;
-var drawing = true;
-var generating = false;
-var first_init = true;
-var focalLength = 1000;
-var info = undefined;
+var currentAttractor; // the current attractor object being used to generate the image
+var state; // which attractor to use
+var particles = []; // the array of particles that travel through the attractor
+var strokes = []; // the array of strokes that are drawn behind the particles
+var drawing = true; // whether or not to draw strokes
+var generating = false; // whether or not the particles are currently being generated
+var first_init = true; // whether or not this is the first time the page has been loaded
+var focalLength = 1000; // the focal length of the camera
+var info = undefined; // the information string that is displayed when the user selects an attractor
 function init()
 {
-
     state = parseFloat(document.getElementById("attractor-state").value)
 
     document.getElementById("menu-button").classList.add("visible")
@@ -303,7 +310,10 @@ function init()
     const things = $('#variable-wrapper').children()
     for (i = 2; i < things.length; i++)
     {
-        things[i].style.display = "none"
+        if (things[i].id) // elements with ids are attractor specific variables
+        {
+            things[i].style.display = "none"
+        }
     }
 
     if (first_init)
@@ -339,83 +349,47 @@ function init()
         info.style.opacity = 0;
     } 
 
-    var start_x, start_y
     switch(state)
     {
         case 0: // Lorenz
-
-            deltaX = 0
-            deltaY = 0
-
-            start_x = 0
-            start_y = 0
-
             currentAttractor = new LorenzAttractor()
             break   
 
         case 1: // Lorenz83
-
-            deltaX = 0
-            deltaY = 0
-
-            start_x = 0
-            start_y = 0
-
             currentAttractor = new Lorenz83Attractor()
             break;
 
         case 2: // Aizawa
-
-            deltaX = 0
-            deltaY = -100
-
-            start_x = 0
-            start_y = midy
-
             currentAttractor = new AizawaAttractor()
             break
     
         case 3: // Thomas
-
-            deltaX = 0
-            deltaY = 0
-
-            start_x = 0
-            start_y = 0
-
             currentAttractor = new ThomasAttractor()
-
             break
+
         case 4: // Dadras
-
-            deltaX = 0;
-            deltaY = 0;
-
-            start_x = 0;
-            start_y = 0;
-
             currentAttractor = new DadrasAttractor();
             break
-        case 5: 
 
-            deltaX = 0;
-            deltaY = 0;
-
-            start_x = 0;
-            start_y = 0;
-
-            currentAttractor = new ChenAttractor();
+        case 5: // Chen
+            currentAttractor = new ChenLeeAttractor();
             break
 
-        case 6:
-
-            deltaX = 0;
-            deltaY = 0;
-
-            start_x = 0;
-            start_y = 0;
-
+        case 6: // Rössler
             currentAttractor = new RosslerAttractor();
+            break;
+
+        case 7: // Halvorsen
+            currentAttractor = new HalvorsenAttractor();
+            break;
+        
+        case 8: // Rabinovich-Fabrikant
+            currentAttractor = new RabinovichFabrikantAttractor();
+            break;
+        
+        case "TODO": // Three-Scroll Unified
+            currentAttractor = new ThreeScrollUnifiedAttractor();
+            break;
     }
 
     let axes = ["x", "y", "z"]
@@ -478,8 +452,14 @@ function animate()
         }
     })
 
-    particles.forEach(particle =>
+    particles.forEach((particle,index) =>
     {
+        if (particle.x > 10000 || particle.x < -10000 || 
+            particle.y > 10000 || particle.y < -10000 || 
+            particle.z > 10000 || particle.z < -10000)
+        {
+            particles.splice(index, 1)
+        }
         particle.draw()
     })
 
@@ -586,6 +566,11 @@ document.addEventListener("keydown", (event) =>
     {
         showUI()
     }
+
+    if (event.key === "`")
+    {
+        debug = !debug
+    }
 })
 
 
@@ -595,7 +580,7 @@ const show_strokes_state = document.getElementById('show-strokes');
 show_strokes_state.addEventListener("change", function()
 {
     show_strokes = !show_strokes
-})
+});
 
 
 var show_particles = false;
@@ -603,7 +588,7 @@ const show_particles_state = document.getElementById('show-particles');
 show_particles_state.addEventListener("change", function()
 {
     show_particles = !show_particles
-})
+});
 
 var show_framerate = false;
 const show_framerate_state = document.getElementById('show-framerate');
@@ -616,13 +601,41 @@ show_framerate_state.addEventListener("change", function()
     } else {
         document.getElementById("framerate").style.display = "none"
     }
-})
+});
+
+context.lineWidth = 2;
+const lineWidthElement = document.getElementById('line-width');
+lineWidthElement.addEventListener("change", function()
+{
+    context.lineWidth = parseInt(lineWidthElement.value);
+});
+
+var num_particles = isMobile() ? 30 : 80;
+const numParticlesElement = document.getElementById('particles');
+numParticlesElement.value = num_particles;
+
+numParticlesElement.addEventListener("change", function()
+{
+    let new_particles = parseInt(numParticlesElement.value);
+    if (new_particles > num_particles)
+    {
+        for (let i = 0; i < new_particles - num_particles; i++)
+        {
+            currentAttractor.spawnNewParticle()
+        }
+    } else {
+        for (let i = 0; i < num_particles - new_particles; i++)
+        {
+            particles.pop()
+        }
+    }
+    num_particles = parseInt(numParticlesElement.value);
+});
 
 // mouse movement
 var targetScale = 1;
 var scale = 1;
 var lerpAmount = 0.1; 
-
 document.addEventListener("wheel", function (e) 
 {
     const slowDown = 0.0007;
@@ -773,7 +786,7 @@ function lerp(start, end, amount)
     return start * (1 - amount) + end * amount;
 }
 
-isMobile = function() 
+function isMobile()
 {
     let check = false;
     (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4))) check = true;})(navigator.userAgent||navigator.vendor||window.opera);
@@ -799,16 +812,37 @@ function debugParticles()
 }
 /* end debugging functions */
 
+
 class Attractor
 {
     constructor()
     {
-
+        deltaX = 0
+        deltaY = 0
     }
 
     getSpeedModifier() { return parseFloat(document.getElementById("speed").value) }
     getNumParticles() { return parseInt(document.getElementById("particles").value) }
     getParticleRadius() { return parseFloat(document.getElementById("radius").value) }
+
+    defaultGeneration()
+    {
+        generating = true
+        for (var i = 1; i < this.getNumParticles(); i += 1)
+        {
+            let middle = 1.5
+            let particle = new Particle(-middle + i / 25, -middle + i / 25)
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    defaultSpawnNewParticle()
+    {
+        let middle = 1.5
+        let particle = new Particle(-middle, -middle)
+        particles.push(particle)
+    }
 }
 
 
@@ -845,14 +879,12 @@ class LorenzAttractor extends Attractor
 
     generation()
     {
-        generating = true
-        for (var i = 1; i < super.getNumParticles(); i += 1)
-        {
-            let middle = 1.5
-            let particle = new Particle(-middle + i / 25, -middle + i / 25)
-            particles.push(particle)
-        }
-        generating = false
+        super.defaultGeneration();
+    }
+    
+    spawnNewParticle()
+    {
+        super.defaultSpawnNewParticle();
     }
 
     attractor(x, y, z) 
@@ -907,14 +939,12 @@ class Lorenz83Attractor extends Attractor
 
     generation()
     {
-        generating = true
-        for (var i = 1; i < super.getNumParticles(); i += 1)
-        {
-            let middle = 1.5
-            let particle = new Particle(-middle + i / 25, -middle + i / 25)
-            particles.push(particle)
-        }
-        generating = false
+        super.defaultGeneration();
+    }
+
+    spawnNewParticle()
+    {
+        super.defaultSpawnNewParticle();
     }
 
     attractor(x, y, z) 
@@ -941,6 +971,9 @@ class AizawaAttractor extends Attractor
     constructor()
     {
         super()
+
+        deltaX = 0
+        deltaY = -100
 
         info = document.getElementById("aizawa-info");
         document.getElementById("aizawa-variables").style.display = "";
@@ -986,6 +1019,12 @@ class AizawaAttractor extends Attractor
                 clearInterval(interval) 
             }
         }, 75)
+    }
+
+    spawnNewParticle()
+    {
+        var particle = new Particle(1, 0)
+        particles.push(particle)
     }
 
     attractor(x, y, z) 
@@ -1052,14 +1091,12 @@ class ThomasAttractor extends Attractor
 
     generation()
     {
-        generating = true
-        for (var i = 1; i < super.getNumParticles(); i += 1)
-        {
-            let middle = 1.5
-            let particle = new Particle(-middle + i / 25, -middle + i / 25)
-            particles.push(particle)
-        }
-        generating = false
+        super.defaultGeneration();
+    }
+
+    spawnNewParticle()
+    {
+        super.defaultSpawnNewParticle();
     }
 
     attractor(x, y, z)
@@ -1081,6 +1118,7 @@ class ThomasAttractor extends Attractor
 
     
 }
+
 
 class DadrasAttractor extends Attractor
 {
@@ -1116,14 +1154,12 @@ class DadrasAttractor extends Attractor
 
     generation()
     {
-        generating = true
-        for (var i = 1; i < super.getNumParticles(); i += 1)
-        {
-            let middle = 1.5
-            let particle = new Particle(-middle + i / 25, -middle + i / 25)
-            particles.push(particle)
-        }
-        generating = false
+        super.defaultGeneration();
+    }
+
+    spawnNewParticle()
+    {
+        super.defaultSpawnNewParticle();
     }
 
     attractor(x, y, z)
@@ -1144,19 +1180,20 @@ class DadrasAttractor extends Attractor
     }
 }
 
-class ChenAttractor extends Attractor
+
+class ChenLeeAttractor extends Attractor
 {
     constructor()
     {
         super();
 
-        info = document.getElementById("chen-info");
-        document.getElementById("chen-variables").style.display = "";
+        info = document.getElementById("chen-lee-info");
+        document.getElementById("chen-lee-variables").style.display = "";
     }
 
-    getAlpha() { return parseFloat(document.getElementById("chen-alpha").value) }
-    getBeta() { return parseFloat(document.getElementById("chen-beta").value) }
-    getDelta() { return parseFloat(document.getElementById("chen-delta").value) }
+    getAlpha() { return parseFloat(document.getElementById("chen-lee-alpha").value) }
+    getBeta() { return parseFloat(document.getElementById("chen-lee-beta").value) }
+    getDelta() { return parseFloat(document.getElementById("chen-lee-delta").value) }
 
     getSizeModifier() { return this.resize_modifier() }
 
@@ -1205,6 +1242,16 @@ class ChenAttractor extends Attractor
         generating = false
     }
 
+    spawnNewParticle()
+    {
+        let one_or_two = Math.random() > 0.5 ? 1 : 2;
+        let x = 0;
+        let y = 0;
+        let z = one_or_two == 1 ? -5 : 5;
+        let particle = new Particle(x, y, z);
+        particles.push(particle)
+    }
+
     attractor(x, y, z)
     {
         let framerate = super.getSpeedModifier() / 4 * 0.017;
@@ -1223,6 +1270,7 @@ class ChenAttractor extends Attractor
     }
 
 }
+
 
 class RosslerAttractor extends Attractor
 {
@@ -1256,14 +1304,12 @@ class RosslerAttractor extends Attractor
 
     generation()
     {
-        generating = true
-        for (var i = 1; i < super.getNumParticles(); i += 1)
-        {
-            let middle = 1.5
-            let particle = new Particle(-middle + i / 25, -middle + i / 25)
-            particles.push(particle)
-        }
-        generating = false
+        super.defaultGeneration();
+    }
+    
+    spawnNewParticle()
+    {
+        super.defaultSpawnNewParticle();
     }
 
     attractor(x, y, z)
@@ -1276,6 +1322,242 @@ class RosslerAttractor extends Attractor
         temp['x'] = -axis['y'] - axis['z'];
         temp['y'] = axis['x'] + this.getA() * axis['y'];
         temp['z'] = this.getB() + axis['z'] * (axis['x'] - this.getC());
+
+        axis['x'] += (temp['x'] * framerate);
+        axis['y'] += (temp['y'] * framerate);
+        axis['z'] += (temp['z'] * framerate);
+        return axis;
+    }
+}
+
+
+class HalvorsenAttractor extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        deltaX = 300;
+        targetDeltaX = 300;
+
+        deltaY = 150;
+        targetDeltaY = 150;
+
+        info = document.getElementById("halvorsen-info");
+        document.getElementById("halvorsen-variables").style.display = "";
+    }
+
+    getA() { return parseFloat(document.getElementById("halvorsen-a").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 20 * innerWidth
+        this.size_modifier_y = 1 / 20 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        super.defaultGeneration();
+    }
+
+    spawnNewParticle()
+    {
+        super.defaultSpawnNewParticle();
+    }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier() / 2 * 0.017;
+
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+
+        temp['x'] = -this.getA() * axis['x'] - 4 * axis['y'] - 4 * axis['z'] - axis['y'] * axis['y'];
+        temp['y'] = -this.getA() * axis['y'] - 4 * axis['z'] - 4 * axis['x'] - axis['z'] * axis['z'];
+        temp['z'] = -this.getA() * axis['z'] - 4 * axis['x'] - 4 * axis['y'] - axis['x'] * axis['x'];
+
+        axis['x'] += (temp['x'] * framerate);
+        axis['y'] += (temp['y'] * framerate);
+        axis['z'] += (temp['z'] * framerate);
+        return axis;
+    }
+}
+
+
+class RabinovichFabrikantAttractor extends Attractor
+{
+    constructor()
+    {
+        super();
+
+        info = document.getElementById("rabinovich-fabrikant-info");
+        document.getElementById("rabinovich-fabrikant-variables").style.display = "";
+    }
+
+    getAlpha() { return parseFloat(document.getElementById("rabinovich-fabrikant-alpha").value) }
+    getGamma() { return parseFloat(document.getElementById("rabinovich-fabrikant-gamma").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 5 * innerWidth
+        this.size_modifier_y = 1 / 5 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        let x1 = 0.5;
+        let y1 = 1.5;
+        let z1 = 0.5;
+
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let sign = Math.random() > 0.5 ? 1 : -1;
+            let rand = sign *  Math.random() * 0.1;
+            let particle = new Particle(x1 + rand, y1 + rand, z1 + rand, 1);
+            particles.push(particle)
+            
+        }
+        generating = false
+    }
+
+    spawnNewParticle()
+    {
+        let x1 = 0.5;
+        let y1 = 1.5;
+        let z1 = 0.5;
+        let sign = Math.random() > 0.5 ? 1 : -1;
+        let rand = sign *  Math.random() * 0.1;
+        let particle = new Particle(x1 + rand, y1 + rand, z1 + rand, 1);
+        particles.push(particle)
+    }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier() * 0.017;
+
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+
+        temp['x'] = axis['y'] * (axis['z'] - 1 + axis['x'] * axis['x']) + this.getGamma() * axis['x'];
+        temp['y'] = axis['x'] * (3 * axis['z'] + 1 - axis['x'] * axis['x']) + this.getGamma() * axis['y'];
+        temp['z'] = -2 * axis['z'] * (this.getAlpha() + axis['x'] * axis['y']);
+
+        axis['x'] += (temp['x'] * framerate);
+        axis['y'] += (temp['y'] * framerate);
+        axis['z'] += (temp['z'] * framerate);
+        return axis;
+    }
+}
+
+
+class ThreeScrollUnifiedAttractor extends Attractor
+{
+    constructor()
+    {
+        super()
+
+        info = document.getElementById("three-scroll-info");
+        document.getElementById("three-scroll-variables").style.display = "";
+    }
+
+    // getA() { return parseFloat(document.getElementById("three-scroll-a").value) }
+    // getB() { return parseFloat(document.getElementById("three-scroll-b").value) }
+    // getC() { return parseFloat(document.getElementById("three-scroll-c").value) }
+    // getD() { return parseFloat(document.getElementById("three-scroll-d").value) }
+    // getE() { return parseFloat(document.getElementById("three-scroll-e").value) }
+    // getF() { return parseFloat(document.getElementById("three-scroll-f").value) }
+
+    getAlpha() { return parseFloat(document.getElementById("three-scroll-alpha").value) }
+    getM() { return parseFloat(document.getElementById("three-scroll-m").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 2000 * innerWidth
+        this.size_modifier_y = 1 / 2000 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        let x1 = 0.1;
+        let y1 = 1;
+        let z1 = -0.1;
+
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let sign = Math.random() > 0.5 ? 1 : -1;
+            let rand = sign *  Math.random() * 0.1;
+            let particle = new Particle(x1 + rand, y1 + rand, z1 + rand, 1);
+            particles.push(particle)
+            
+        }
+    }
+
+    spawnNewParticle()
+    {
+        super.defaultSpawnNewParticle()
+    }
+
+    // attractor(x, y, z)
+    // {
+    //     let framerate = super.getSpeedModifier() / 20 * 0.017;
+
+    //     let axis = { "x": x, "y": y, "z": z }
+    //     let temp = {}
+
+    //     temp['x'] = this.getA() * (axis['y'] - axis['x']) + this.getD() * axis['y'] * axis['z'];
+    //     temp['y'] = this.getB() * axis['x'] - axis['x'] * axis['z'] + this.getF() * axis['y'];
+    //     temp['z'] = this.getC() * axis['z'] + axis['x'] * axis['y'] - this.getE() * axis['x'] * axis['x'];
+
+    //     axis['x'] += (temp['x'] * framerate);
+    //     axis['y'] += (temp['y'] * framerate);
+    //     axis['z'] += (temp['z'] * framerate);
+    //     return axis;
+    // }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier() / 10 * 0.017;
+
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+
+        let alpha = this.getAlpha();
+
+        temp['x'] = (20 * alpha + 40) * (axis['y'] - axis['x']) + ((6 * alpha + 4) / 25) * axis['x'] * axis['z'];
+        temp['y'] = (55 - 90 * alpha) * axis['x'] + (5 * alpha + 20) * axis['y'] - axis['x'] * axis['z'];
+        temp['z'] = -13/20 * axis['x'] * axis['x'] + axis['x'] * axis['y'] +  (11 - 6 * alpha) / 6 * axis['z'] + this.getM();
 
         axis['x'] += (temp['x'] * framerate);
         axis['y'] += (temp['y'] * framerate);
