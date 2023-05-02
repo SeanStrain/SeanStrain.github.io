@@ -83,7 +83,24 @@
                 <img src="images/mc.png">
             </div>
             <div id="page-5" class="page">
-                <div id="page-5-title"></div>
+                <div>&nbsp;<span id="page-5-title"></span></div>
+                <div id="page-5-code" style="display: none">
+                    <span style="color: rgb(143, 62, 143);">function</span><span style="color:rgb(45, 148, 45)"> randomString()</span><br>
+                        {<br>
+                            &nbsp;&nbsp;<span style="color: rgb(143, 62, 143);">const</span> <span style="color: rgb(107, 62, 143);">characters</span> <span style="color: rgb(143, 62, 143);">=</span> <span style="color:rgb(238, 238, 106)">"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";</span><br>
+                            &nbsp;&nbsp;<span style="color: rgb(143, 62, 143);">const</span> <span style="color: rgb(107, 62, 143);">specials</span> <span style="color: rgb(143, 62, 143);">=</span> <span style="color:rgb(238, 238, 106)">"!@#$%^&*()_+~`|}{[]:;?><,./-=";</span><br>
+                            &nbsp;&nbsp;<span style="color: rgb(143, 62, 143);">const</span> <span style="color: rgb(107, 62, 143);">nums</span> <span style="color: rgb(143, 62, 143);">=</span> <span style="color:rgb(238, 238, 106)">"0123456789";</span><br>
+                            &nbsp;&nbsp;<span style="color: rgb(143, 62, 143);">let</span> string <span style="color: rgb(143, 62, 143);">=</span> <span style="color:rgb(238, 238, 106)">""</span>;<br>
+                            &nbsp;&nbsp;<span style="color: rgb(143, 62, 143);">for</span> (<span style="color: rgb(143, 62, 143);">let</span> i <span style="color: rgb(143, 62, 143);">=</span> <span style="color: rgb(107, 62, 143);">0</span>; i <span style="color: rgb(143, 62, 143);"><</span> 7; i<span style="color: rgb(143, 62, 143);">++</span>)<br>
+                            &nbsp;&nbsp;{<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;string <span style="color: rgb(143, 62, 143);">+=</span> <span style="color: rgb(107, 62, 143);">characters</span>[<span style="color: rgb(107, 62, 143);">Math</span>.<span style="color:rgb(45, 148, 45)">floor</span>(<span style="color: rgb(107, 62, 143);">Math</span>.<span style="color:rgb(45, 148, 45)">random</span>() <span style="color: rgb(143, 62, 143);">*</span> <span style="color: rgb(107, 62, 143);">characters</span>.<span style="color: rgb(107, 62, 143);">length</span>)];<br>
+                            &nbsp;&nbsp;}<br>
+                            &nbsp;&nbsp;string <span style="color: rgb(143, 62, 143);">+=</span> <span style="color: rgb(107, 62, 143);">specials</span>[<span style="color: rgb(107, 62, 143);">Math</span>.<span style="color:rgb(45, 148, 45)">floor</span>(<span style="color: rgb(107, 62, 143);">Math</span>.<span style="color:rgb(45, 148, 45)">random</span>() <span style="color: rgb(143, 62, 143);">*</span> <span style="color: rgb(107, 62, 143);">specials</span>.<span style="color: rgb(107, 62, 143);">length</span>)];<br>
+                            &nbsp;&nbsp;string <span style="color: rgb(143, 62, 143);">+=</span> <span style="color: rgb(107, 62, 143);">nums</span>[<span style="color: rgb(107, 62, 143);">Math</span>.<span style="color:rgb(45, 148, 45)">floor</span>(<span style="color: rgb(107, 62, 143);">Math</span>.<span style="color:rgb(45, 148, 45)">random</span>() <span style="color: rgb(143, 62, 143);">*</span> <span style="color: rgb(107, 62, 143);">nums</span>.<span style="color: rgb(107, 62, 143);">length</span>)];<br>
+                            &nbsp;&nbsp;string <span style="color: rgb(143, 62, 143);">=</span> string.<span style="color:rgb(45, 148, 45)">split</span>(<span style="color:rgb(238, 238, 106)">''</span>).<span style="color:rgb(45, 148, 45)">sort</span>(<span style="color: rgb(143, 62, 143);">function</span>(){<span style="color: rgb(143, 62, 143);">return 0.5</span>-<span style="color: rgb(107, 62, 143);">Math</span>.<span style="color:rgb(45, 148, 45)">random</span>()}).<span style="color:rgb(45, 148, 45)">join</span>(<span style="color:rgb(238, 238, 106)">''</span>);<br>
+                            &nbsp;&nbsp;<span style="color: rgb(143, 62, 143);">return</span> string;<br>
+                        }</span>
+                </div>
             </div>
             <div id="page-6" class="page">
                 <iframe src="../../Attractors/attractors.html"></iframe>

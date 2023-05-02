@@ -645,8 +645,6 @@ restart.addEventListener("click", function() // restart the attractor
     }, 2000)
 });
 
-
-
 // mouse movement
 var targetScale = 1;
 var scale = 1;

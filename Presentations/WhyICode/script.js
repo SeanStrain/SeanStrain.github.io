@@ -243,7 +243,7 @@ function changeState(newState)
             break;
         // page-5:
         case 11:
-            page = document.getElementById("page-5");
+            page = document.getElementById("page-5-title");
             smoothScrollTo(innerHeight * 4);
             resizeScrollPosition = 4;
             var string = randomString();
@@ -264,14 +264,18 @@ function changeState(newState)
             }, 5000);
 
             break;
-        // page-6:
         case 12:
+            const code = document.getElementById("page-5-code");
+            code.style.display = "block";
+        break;
+        // page-6:
+        case 13:
             page = document.getElementById("page-6");
             smoothScrollTo(innerHeight * 5);
             resizeScrollPosition = 5;
             break;
         // page-7:
-        case 13:
+        case 14:
             page = document.getElementById("page-7");
             smoothScrollTo(innerHeight * 6);
             resizeScrollPosition = 6;
