@@ -632,6 +632,21 @@ numParticlesElement.addEventListener("change", function()
     num_particles = parseInt(numParticlesElement.value);
 });
 
+const restart = document.getElementById('restart');
+restart.addEventListener("click", function() // restart the attractor
+{
+    clearup()
+    generating = false
+    setTimeout(() =>
+    {
+        strokes = []
+        particles = []
+        init()
+    }, 2000)
+});
+
+
+
 // mouse movement
 var targetScale = 1;
 var scale = 1;
@@ -646,7 +661,6 @@ function updateScale() {
   scale = lerp(scale, targetScale, lerpAmount);
   requestAnimationFrame(updateScale);
 }
-
 updateScale();
 
 // drag vars
