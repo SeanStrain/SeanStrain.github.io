@@ -182,13 +182,13 @@ class Canvas
   }
 }
 
-let canvas  = new Canvas(context, canvasEl, canvasColour)
-let player  = new draw.Player(midx, midy, 30, playerColour, canvas)
-let reticle = new draw.Reticle(midx, midy,  5, playerColour, canvas)
-let animationId
-let displayedPower
-let clicks
-let kills
+const canvas  = new Canvas(context, canvasEl, canvasColour);
+var player  = new draw.Player(midx, midy, 30, playerColour, canvas);
+var reticle = new draw.Reticle(midx, midy,  5, playerColour, canvas);
+var animationId;
+var displayedPower;
+var clicks;
+var kills;
 
 function resetHTML()
 {
@@ -440,28 +440,28 @@ function playerMovement()
   // Player Movement:
   if ((keys["KeyW"] || keys["ArrowUp"]) && speedY < maxSpeed)
   {
-    speedY += deltaV
+    speedY += deltaV;
   }
 
   if ((keys["KeyD"] || keys["ArrowRight"]) && speedX > -maxSpeed)
   {
-    speedX -= deltaV
+    speedX -= deltaV;
   }
 
   if ((keys["KeyS"] || keys["ArrowDown"]) && speedY > -maxSpeed)
   {
-    speedY -= deltaV
+    speedY -= deltaV;
   }
 
   if ((keys["KeyA"] || keys["ArrowLeft"]) && speedX < maxSpeed)
   {
-    speedX += deltaV
+    speedX += deltaV;
   }
 
-  speedX *= friction
-  speedY *= friction
+  speedX *= friction;
+  speedY *= friction;
 
-  return speedX, speedY
+  return speedX, speedY;
 }
 
 function updateCanvas()
@@ -648,8 +648,8 @@ function spawnEnemies()
     {
       const r = Math.random() * (60 - 10) + 10
 
-      let x
-      let y
+      let x;
+      let y;
 
       if (Math.random() < 0.5) {
         x = Math.random() < 0.5 ? 0 - r : canvas.width  + r

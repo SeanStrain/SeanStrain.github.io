@@ -2,6 +2,7 @@ import * as colour from "./Colour.mjs"
 
 const particleGenRate = 400
 const shootColour     = new colour.HSLObject(0, 100, 50)
+const shootAudio      = new Audio("audio/shoot.wav")
 
 var friction  = 1 // modifies enemy speed
 var direction = 1 // modifies enemy direction
@@ -113,21 +114,22 @@ export class Player extends Drawable
 
   shoot(x, y)
   {
-    var rand = (Math.random() - 0.5) * this.spread
-    var angle = Math.atan2(y - this.y, x - this.x)
-    var proj  = new Projectile(this.x, this.y, 5, shootColour, this.canvas, new velocity(angle + rand, Math.random()+4))
+    const rand = (Math.random() - 0.5) * this.spread;
+    const angle = Math.atan2(y - this.y, x - this.x);
+    const proj  = new Projectile(this.x, this.y, 5, shootColour, this.canvas, new velocity(angle + rand, Math.random()+4));
+    shootAudio.play()
     return proj
   }
 
   setParticleColour(c)
   {
-    var c = new colour.HSLObject(c.hue, c.sat, c.light)
+    const c = new colour.HSLObject(c.hue, c.sat, c.light)
     this.particleColour = c
   }
 
   resetParticleColour()
   {
-    var c = new colour.HSLObject(this.baseColour.hue, this.baseColour.sat, this.baseColour.light)
+    const c = new colour.HSLObject(this.baseColour.hue, this.baseColour.sat, this.baseColour.light)
     this.setParticleColour(c)
   }
 
