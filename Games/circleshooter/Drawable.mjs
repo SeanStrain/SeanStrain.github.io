@@ -123,14 +123,12 @@ export class Player extends Drawable
 
   setParticleColour(c)
   {
-    let c = new colour.HSLObject(c.hue, c.sat, c.light);
-    this.particleColour = c;
+    this.particleColour = new colour.HSLObject(c.hue, c.sat, c.light);
   }
 
   resetParticleColour()
   {
-    let c = new colour.HSLObject(this.baseColour.hue, this.baseColour.sat, this.baseColour.light);
-    this.setParticleColour(c);
+    this.setParticleColour(new colour.HSLObject(this.baseColour.hue, this.baseColour.sat, this.baseColour.light));
   }
 
   hitEnemy()
