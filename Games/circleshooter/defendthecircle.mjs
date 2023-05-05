@@ -177,6 +177,8 @@ class Canvas
   shoot()
   {
     projectiles.push(player.shoot(mouseX, mouseY))
+    const shootAudio = new Audio('sfx/shoot.wav')
+    shootAudio.play()
   }
 }
 
