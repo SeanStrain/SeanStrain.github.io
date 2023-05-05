@@ -2,7 +2,7 @@ import * as colour from "./Colour.mjs"
 
 const particleGenRate = 400;
 const shootColour     = new colour.HSLObject(0, 100, 50);
-const shootAudio      = new Audio("audio/shoot.wav");
+const shootAudio      = new Audio("sfx/shoot.wav");
 
 var friction  = 1; // modifies enemy speed
 var direction = 1; // modifies enemy direction
