@@ -117,7 +117,7 @@ export class Player extends Drawable
     let rand = (Math.random() - 0.5) * this.spread;
     let angle = Math.atan2(y - this.y, x - this.x);
     let proj  = new Projectile(this.x, this.y, 5, shootColour, this.canvas, new velocity(angle + rand, Math.random()+4));
-    shootAudio.play()
+    //shootAudio.play()
     return proj
   }
 
