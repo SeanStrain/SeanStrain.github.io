@@ -513,6 +513,63 @@
                     <mi>xy</mi>
                 </math>
             </div>
+            <div id="sprott-info" style="display:none">
+                <math>
+                    <mtext>Sprott Attractor</mtext>
+                </math>
+                <br>
+                <math>
+                    <mfrac>
+                        <mn>dx</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>y</mi>
+                    <mo>+</mo>
+                    <mi>a</mi>
+                    <mi>x</mi>
+                    <mi>y</mi>
+                    <mo>+</mo>
+                    <mi>x</mi>
+                    <mi>z</mi>
+                </math>
+                <br>
+                <math>
+                    <mfrac>
+                        <mn>dy</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mn>1</mn>
+                    <mo>-</mo>
+                    <mi>b</mi>
+                    <msup>
+                        <mi>x</mi>
+                        <mn>2</mn>
+                    </msup>
+                    <mi>y</mi>
+                    <mi>z</mi>
+                </math>
+                <br>
+                <math>
+                    <mfrac>
+                        <mn>dz</mn>
+                        <mn>dt</mn>
+                    </mfrac>
+                    <mo>=</mo>
+                    <mi>x</mi>
+                    <mo>-</mo>
+                    <msup>
+                        <mi>x</mi>
+                        <mn>2</mn>
+                    </msup>
+                    <mo>-</mo>
+                    <msup>
+                        <mi>y</mi>
+                        <mn>2</mn>
+                    </msup>
+                </math>
+            </div>
             <div id="three-scroll-info" style="display:none">
 
             </div>
@@ -817,6 +874,7 @@
                     <option value="6">Rössler</option>
                     <option value="7">Halvorsen</option>
                     <option value="8">Rabinovich-Fabrikant</option>
+                    <option value="9">Sprott</option>
                     <!-- <option value="9">Three-Scroll-Unified</option> -->
                 </select>
             </div>
@@ -1013,6 +1071,16 @@
                     <div class="menu-item">
                         <div>γ</div>
                         <input type="number" id="rabinovich-fabrikant-gamma" value="0.1" step="0.05">
+                    </div>
+                </div>
+                <div id="sprott-variables" style="display:none">
+                    <div class="menu-item">
+                        <div>a:</div>
+                        <input type="number" id="sprott-a" value="2" step="0.1">
+                    </div>
+                    <div class="menu-item">
+                        <div>b:</div>
+                        <input type="number" id="sprott-b" value="2" step="0.1">
                     </div>
                 </div>
                 <div id="three-scroll-variables" style="display:none">

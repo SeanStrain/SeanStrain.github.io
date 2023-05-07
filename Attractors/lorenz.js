@@ -19,8 +19,7 @@ canvasEl.height = innerHeight;
 var midx = innerWidth  / 2;
 var midy = innerHeight / 2;
 
-// COLOUR
-
+// COLOUR:
 class HSLObject
 {
   constructor(hue, sat, light)
@@ -132,8 +131,6 @@ function randomHSL(hue, sat, light)
   return randomHSLObject
 }
 
-// MAIN:
-// CANVAS:
 class Canvas
 {
     constructor(canvas, context, colour, id)
@@ -160,7 +157,6 @@ class Canvas
 var canvasColour = `rbga(${10}, ${10}, ${12}, 0.005)`;
 var canvas  = new Canvas(canvasEl, context, canvasColour, '0');
 
-// STROKE:
 var colour = function() {}
 class Stroke
 {
@@ -220,7 +216,6 @@ class Stroke
     }
 }
 
-// PARTICLE:
 class Particle
 {
     constructor(x, y, z = 0, type = 0)
@@ -387,8 +382,8 @@ function init()
             currentAttractor = new RabinovichFabrikantAttractor();
             break;
         
-        case "TODO": // Three-Scroll Unified
-            currentAttractor = new ThreeScrollUnifiedAttractor();
+        case 9: // Sprott
+            currentAttractor = new SprottAttractor();
             break;
     }
 
@@ -424,7 +419,8 @@ var lastFps = 0
 function animate()
 {
 
-    if (drawing === false) { 
+    if (drawing === false) 
+    { 
         total_ticks = 0
         ticks = 0
         fps = 60
@@ -444,9 +440,7 @@ function animate()
             if (stroke.new)
             {
                 stroke.draw()
-            }
-            else
-            {
+            } else {
                 stroke.update() // exists in case I find a way to optimise drawing
             }
         }
@@ -555,7 +549,8 @@ function showUI()
     const elements = [framerate, attractor_info, menu, menu_button]
 
     const opacity = show_ui ? 1 : 0
-    elements.forEach(element => {
+    elements.forEach(element => 
+    {
         gsap.to(element, {opacity: opacity, duration: 0.5})
     })
 }
@@ -655,7 +650,8 @@ document.addEventListener("wheel", function (e)
     targetScale -= e.deltaY * slowDown ;
 });
 
-function updateScale() {
+function updateScale() 
+{
   scale = lerp(scale, targetScale, lerpAmount);
   requestAnimationFrame(updateScale);
 }
@@ -682,11 +678,13 @@ var rotationZ = 0;
 
 body.addEventListener("mousedown", function (e) 
 {
-    if (e.button === 0) {
+    if (e.button === 0) 
+    {
       isDragging = true;
       lastMousePosition = { x: e.clientX, y: e.clientY };
     }
-    if (e.button === 2) {
+    if (e.button === 2) 
+    {
         isRightClick = true;
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
@@ -695,13 +693,15 @@ body.addEventListener("mousedown", function (e)
   
 body.addEventListener("mousemove", function (e) 
 {
-    if (isDragging) {
+    if (isDragging) 
+    {
       targetDeltaX += e.clientX - lastMousePosition.x;
       targetDeltaY += e.clientY - lastMousePosition.y;
   
       lastMousePosition = { x: e.clientX, y: e.clientY };
     }
-    if (isRightClick) {
+    if (isRightClick) 
+    {
       const deltaX = e.clientX - lastMouseX;
       const deltaY = e.clientY - lastMouseY;
   
@@ -1482,6 +1482,80 @@ class RabinovichFabrikantAttractor extends Attractor
     }
 }
 
+class SprottAttractor extends Attractor
+{
+    constructor()
+    {
+        super()
+
+        info = document.getElementById("sprott-info");
+        document.getElementById("sprott-variables").style.display = "";
+    }
+
+    getA() { return parseFloat(document.getElementById("sprott-a").value) }
+    getB() { return parseFloat(document.getElementById("sprott-b").value) }
+
+    getSizeModifier() { return this.resize_modifier() }
+
+    resize_modifier()
+    {
+        this.size_modifier_x = 1 / 5 * innerWidth
+        this.size_modifier_y = 1 / 5 * innerHeight
+        return { "x": this.size_modifier_x, "y": this.size_modifier_y }
+    }
+
+    colour(hue, sat, z)
+    {
+        const hue_ = hue / 5
+        const sat_ = sat / 5
+        return "hsl(" + hue_ + "," + sat_ + "%," + 50 + "%)"
+    }
+
+    generation()
+    {
+        let x1 = 0.51;
+        let y1 = -0.34;
+        let z1 = 1.4;
+
+        generating = true
+        for (var i = 1; i < super.getNumParticles(); i += 1)
+        {
+            let sign = Math.random() > 0.5 ? 1 : -1;
+            let rand = sign *  Math.random() * 0.25;
+            let particle = new Particle(x1 + rand, y1 + rand, z1 + rand, 1);
+            particles.push(particle)
+        }
+        generating = false
+    }
+
+    spawnNewParticle()
+    {
+        let x1 = 0.51;
+        let y1 = -0.34;
+        let z1 = 1.4;
+        let sign = Math.random() > 0.5 ? 1 : -1;
+        let rand = sign *  Math.random() * 0.1;
+        let particle = new Particle(x1 + rand, y1 + rand, z1 + rand, 1);
+        particles.push(particle)
+    }
+
+    attractor(x, y, z)
+    {
+        let framerate = super.getSpeedModifier() * 1.5 * 0.017;
+
+        let axis = { "x": x, "y": y, "z": z }
+        let temp = {}
+
+        temp['x'] = axis['y'] + this.getA() * axis['x'] * axis['y'] + axis['x'] * axis['z'];
+        temp['y'] = 1 - this.getB() * axis['x'] * axis['x'] + axis['y'] * axis['z'];
+        temp['z'] = axis['x'] - axis['x'] * axis['x'] - axis['y'] * axis['y'];    
+
+        axis['x'] += (temp['x'] * framerate);
+        axis['y'] += (temp['y'] * framerate);
+        axis['z'] += (temp['z'] * framerate);
+        return axis;
+    }
+}
 
 class ThreeScrollUnifiedAttractor extends Attractor
 {
