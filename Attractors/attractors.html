@@ -7,6 +7,7 @@
         <div id="framerate" style="display:none"></div>
         <div id="attractor-info">
             <div id="lorenz-info" style="display:none">
+                <span style="display:none">Deterministic Nonperiodic Flow</span>
                 <math>
                     <mtext>Lorenz Attractor</mtext>
                 </math>
@@ -57,9 +58,10 @@
                     <mi>&#x3B2;</mi>
                 </math>
             </div>
-            <div id="lorenz83-info" style="display:none">
+            <div id="lorenz84-info" style="display:none">
+                <span style="display:none">Irregularity: a fundamental property of the atmosphere</span>
                 <math>
-                    <mtext>Lorenz83 Attractor</mtext>
+                    <mtext>Lorenz84 Attractor</mtext>
                 </math>
                 <br>
                 <math>
@@ -70,9 +72,6 @@
                     </mfrac>
                     <mo>=</mo>
                     <mo>-</mo>
-                    <mi>a</mi>
-                    <mi>x</mi>
-                    <mo>-</mo>
                     <msup>
                         <mi>y</mi>
                         <mn>2</mn>
@@ -82,6 +81,9 @@
                         <mi>z</mi>
                         <mn>2</mn>
                     </msup>
+                    <mo>-</mo>
+                    <mi>a</mi>
+                    <mi>x</mi>
                     <mo>+</mo>
                     <mi>a</mi>
                     <mi>f</mi>
@@ -94,15 +96,14 @@
                         <mn>dt</mn>
                     </mfrac>
                     <mo>=</mo>
-                    <mo>-</mo>
-                    <mi>y</mi>
-                    <mo>+</mo>
                     <mi>x</mi>
                     <mi>y</mi>
                     <mo>-</mo>
                     <mi>b</mi>
                     <mi>x</mi>
                     <mi>z</mi>
+                    <mo>-</mo>
+                    <mi>y</mi>
                     <mo>+</mo>
                     <mi>g</mi>
                 </math>
@@ -114,14 +115,13 @@
                         <mn>dt</mn>
                     </mfrac>
                     <mo>=</mo>
-                    <mo>-</mo>
-                    <mi>z</mi>
-                    <mo>+</mo>
                     <mi>b</mi>
                     <mi>x</mi>
                     <mi>y</mi>
                     <mo>+</mo>
                     <mi>x</mi>
+                    <mi>z</mi>
+                    <mo>-</mo>
                     <mi>z</mi>
                 </math>
             </div>
@@ -866,7 +866,7 @@
                 <div>Attractor Type:</div>
                 <select id="attractor-state" class="menu-item">
                     <option value="0">Lorenz</option>
-                    <option value="1">Lorenz83</option>
+                    <option value="1">Lorenz84</option>
                     <option value="2">Aizawa</option>
                     <option selected value="3">Thomas</option>
                     <option value="5">Dadras</option>
@@ -903,6 +903,11 @@
                     <select id="show-framerate">
                         <option selected value="false">No</option>
                         <option value="true">Yes</option>
+                    </select>
+                    <div>Delete Lines:</div>
+                    <select id="update-canvas">
+                        <option value="false">No</option>
+                        <option selected value="true">Yes</option>
                     </select>
                 </div>
             </div>
@@ -957,22 +962,22 @@
                         <input type="number" id="lorenz-beta" value="2.7" step="0.1">
                     </div>
                 </div>
-                <div id="lorenz83-variables" style="display:none">
+                <div id="lorenz84-variables" style="display:none">
                     <div class="menu-item">
                         <div>a:</div>
-                        <input type="number" id="lorenz83-a" value="0.95" step="0.05">
+                        <input type="number" id="lorenz84-a" value="0.95" step="0.05">
                     </div>
                     <div class="menu-item">
                         <div>b:</div>
-                        <input type="number" id="lorenz83-b" value="7.91" step="0.1">
+                        <input type="number" id="lorenz84-b" value="7.91" step="0.1">
                     </div>
                     <div class="menu-item">
                         <div>f:</div>
-                        <input type="number" id="lorenz83-f" value="4.83" step="0.1">
+                        <input type="number" id="lorenz84-f" value="4.83" step="0.1">
                     </div>
                     <div class="menu-item">
                         <div>g:</div>
-                        <input type="number" id="lorenz83-g" value="4.66" step="0.1">
+                        <input type="number" id="lorenz84-g" value="4.66" step="0.1">
                     </div>
                 </div>
                 <div id="aizawa-variables" style="display: none">

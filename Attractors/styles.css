@@ -58,6 +58,11 @@ math
 /* end start */
 
 /* menu: */
+select
+{
+    opacity: 1;
+}
+
 .toggle-menu
 {
     position: absolute;
@@ -167,12 +172,8 @@ math
 {
     padding-bottom: 10px;
 }
-/* end menu */
 
-select
-{
-    opacity: 1;
-}
+/* end menu */
 
 #attractor-info
 {
@@ -190,6 +191,7 @@ select
 {
     opacity: 0;
 }
+
 #axes *
 {
     user-select: none;
@@ -205,7 +207,8 @@ select
     left: 10px;
 }
 
-#x-axis {
+#x-axis 
+{
     background-color: blue;
     transform: rotate3D(0, 0, 1, 90deg) translate(22px, -28px);
 }
@@ -215,7 +218,8 @@ select
     transform: translateY(-200%);
 }
 
-#y-axis {
+#y-axis 
+{
     background-color: green;
     transform: rotate3d(0, 0, 0, 0deg) translate(0, 0);
 }
@@ -225,7 +229,8 @@ select
     transform: translateY(-200%);
 }
 
-#z-axis {
+#z-axis 
+{
     background-color: red;
     transform: rotate3d(1, 0, 0, 90deg) translate(0, 0);
 }

@@ -142,8 +142,11 @@ class Canvas
       this.id         = id;
       this.update = function()
         {
-            this.context.fillStyle = this.colour;
-            this.context.clearRect(0, 0, innerWidth, innerHeight);
+            if (updateCanvas)
+            {
+                this.context.fillStyle = this.colour;
+                this.context.clearRect(0, 0, innerWidth, innerHeight);
+            }
         }
     }
 
@@ -351,7 +354,7 @@ function init()
             break   
 
         case 1: // Lorenz83
-            currentAttractor = new Lorenz83Attractor()
+            currentAttractor = new Lorenz84Attractor()
             break;
 
         case 2: // Aizawa
@@ -598,6 +601,13 @@ show_framerate_state.addEventListener("change", function()
     }
 });
 
+var updateCanvas = true; // whether to redraw the canvas every frame
+const update_canvas_state = document.getElementById('update-canvas');
+update_canvas_state.addEventListener("change", function()
+{
+    updateCanvas = !updateCanvas
+});
+
 context.lineWidth = 2;
 const lineWidthElement = document.getElementById('line-width');
 lineWidthElement.addEventListener("change", function()
@@ -688,6 +698,11 @@ body.addEventListener("mousedown", function (e)
         isRightClick = true;
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
+
+        // return to updating canvas as right click
+        // will break this function
+        updateCanvas = true;
+        update_canvas_state.value = "true";
       }
 })
   
@@ -918,20 +933,20 @@ class LorenzAttractor extends Attractor
 }
 
 
-class Lorenz83Attractor extends Attractor
+class Lorenz84Attractor extends Attractor
 {
     constructor()
     {
         super();
 
-        info = document.getElementById("lorenz83-info");
-        document.getElementById("lorenz83-variables").style.display = "";
+        info = document.getElementById("lorenz84-info");
+        document.getElementById("lorenz84-variables").style.display = "";
     }
 
-    getA() { return parseFloat(document.getElementById("lorenz83-a").value) }
-    getB() { return parseFloat(document.getElementById("lorenz83-b").value) }
-    getF() { return parseFloat(document.getElementById("lorenz83-f").value) }
-    getG() { return parseFloat(document.getElementById("lorenz83-g").value) }
+    getA() { return parseFloat(document.getElementById("lorenz84-a").value) }
+    getB() { return parseFloat(document.getElementById("lorenz84-b").value) }
+    getF() { return parseFloat(document.getElementById("lorenz84-f").value) }
+    getG() { return parseFloat(document.getElementById("lorenz84-g").value) }
 
     getSizeModifier() { return this.resize_modifier() }
 
@@ -961,7 +976,7 @@ class Lorenz83Attractor extends Attractor
 
     attractor(x, y, z) 
     {
-        let framerate = super.getSpeedModifier() / 4 * 0.017;
+        let framerate = super.getSpeedModifier() / 6 * 0.017;
     
         let axis = { "x": x, "y": y, "z": z }
         let temp = {}
