@@ -18,6 +18,23 @@
     user-select: none;
 }
 
+/* general css*/
+.big-text
+{
+    font-size: max(5vw,32px);
+}
+
+.medium-text
+{
+    font-size: max(4vw,24px);
+}
+
+.small-text
+{
+    font-size: max(1vw,16px);
+}
+/* end general css */
+
 body 
 {
     margin: 0;
@@ -354,5 +371,4 @@ iframe
     justify-content: left;
     align-items: center;
     text-align: left;
-    font-size: medium;
 }
