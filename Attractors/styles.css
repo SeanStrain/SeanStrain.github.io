@@ -10,6 +10,24 @@
     --black: #060608;
 }
 
+/* general css*/
+.big-text
+{
+    font-size: max(5vw,32px);
+}
+
+.medium-text
+{
+    font-size: max(4vw,24px);
+}
+
+.small-text
+{
+    font-size: max(1vw,16px);
+}
+/* end general css */
+
+
 body
 {
     margin: 0;
@@ -53,7 +71,6 @@ math
 {
     height: 100%;
     width: 100%;
-    font-size: 8vmin;
 }
 /* end start */
 
@@ -168,11 +185,16 @@ select
     display: block;
 }
 
+.menu > * select, .menu > * input, .menu > * button
+{
+    font-size: max(0.75vw, 12px);
+}
+
+
 .menu-item-wrapper
 {
     padding-bottom: 10px;
 }
-
 /* end menu */
 
 #attractor-info
@@ -183,7 +205,6 @@ select
     left: 10px;
     color:  var(--white);
     padding: 5px;
-    font-size: 1.5vmin;
 }
 
 /* axes */
