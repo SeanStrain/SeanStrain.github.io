@@ -30,11 +30,11 @@ const canvasColour    = new colour.HSLObject(0, 10, 10)
 const scoreShadow = new colour.cssTextShadow(2, 2, 6, shadowColourOne, shadowColourTwo)
 
 // canvas element arrays:
-let projectiles   = []
-let enemies       = []
-let particles     = []
-let powerUps      = []
-let canvasEffects = []
+var projectiles   = []
+var enemies       = []
+var particles     = []
+var powerUps      = []
+var canvasEffects = []
 
 // movement values:
 const smokePoint = 0.5    // speed at which smoke appears from player
@@ -137,12 +137,14 @@ class Canvas
     let timer = 0
     this.override = true
     var length = timeFrame / 2000
+    
     gsap.to(showColour, {
       sat: 80,
       light: 60,
       ease: "none",
       duration: length
     })
+
     setTimeout(() =>
     {
       gsap.to(showColour, {
@@ -153,6 +155,7 @@ class Canvas
         duration: length
       })
     }, length * 1000)
+
     this.update = function()
     {
       var grd = this.ctx.createRadialGradient(midx, midy, this.width / 2.5, this.width/2, this.height/2, this.width);
@@ -161,6 +164,7 @@ class Canvas
       this.ctx.fillStyle = grd;
       this.ctx.fillRect(0, 0, this.width, this.height)
     }
+
     let interval = setInterval(() =>
     {
       timer += intervalTime
