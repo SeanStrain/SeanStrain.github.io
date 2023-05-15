@@ -2,7 +2,8 @@ $(document).ready( function() {$(this).scrollTop(0);}); // on load, scroll to to
 window.onbeforeunload = function() {$(this).scrollTop(0);} // refresh
 
 const body = document.getElementsByTagName("body")[0];
-body.classList.add("loaded");
+const homeBackground = document.getElementById("home-background");
+homeBackground.classList.add("loaded");
 
 
 // Home page animations:

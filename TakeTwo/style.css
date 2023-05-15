@@ -29,15 +29,21 @@ body
     display: flex;
     margin: 0;
     font-family: lucida,sans-serif;
-    background: linear-gradient(to right, var(--g1), var(--g1), var(--g2), var(--g2), var(--g1));
-    background-size: 200%;
-    animation: background-pan 6s linear infinite;    
     color: var(--text-color);
     flex-direction: column;
     overflow: hidden;
     isolation: isolate;
 }
-body::before
+#home-background
+{
+    position: absolute;
+    height: 160dvh;
+    width: 100dvw;
+    background: linear-gradient(to right, var(--g1), var(--g1), var(--g2), var(--g2), var(--g1));
+    animation: background-pan 6s linear infinite;    
+    background-size: 200%;
+}
+#home-background::before
 {
     position: absolute;
     height: 160dvh;
@@ -50,7 +56,7 @@ body::before
     left: 0;
     opacity: 1;
 }
-body.loaded::before
+#home-background.loaded::before
 {
     transition: opacity 4s ease-in-out;
     opacity: 0;
@@ -741,8 +747,45 @@ header > div > div
 /* end about page */
 
 /* work page */
+#work-cover
+{
+    position: relative;
+    top: -80dvh;
+    background: #232526; 
+    background: -webkit-linear-gradient(to right, #414345, #232526); 
+    background: linear-gradient(to right, #414345, #232526); 
+    min-height: 80dvh;
+}
 #work
 {
-    min-height: 110dvh;
+    position: relative;
+    background: #232526; 
+    background: -webkit-linear-gradient(to right, #414345, #232526); 
+    background: linear-gradient(to right, #414345, #232526); 
+    min-height: 100dvh;
+    font-family: 'Montserrat-Regular', sans-serif;
+}
+#work-scroll-flag
+{
+    position: absolute;
+    bottom: 30dvh;
+    width: 100%;
+    height: 1px;
+}
+
+#work-wrapper
+{
+    display: -ms-grid;
+    display: grid;
+    margin-top: 4rem;
+    align-items: start;
+    align-content: start;
+    grid-auto-columns: 1fr;
+    grid-column-gap: 4rem;
+    grid-row-gap: 3rem;
+    -ms-grid-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+    -ms-grid-rows: auto auto;
+    grid-template-rows: auto auto;
 }
 /* end work page */
