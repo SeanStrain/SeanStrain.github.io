@@ -221,7 +221,7 @@ header > div > div
 #tiles 
 {
     height: calc(110vh - 1px);
-    width: calc(110vw - 1px);
+    width: calc(100vw - 1px);
     position: relative;
     z-index: 2;
     transition: background 1s ease;
