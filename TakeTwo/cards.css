@@ -19,7 +19,7 @@
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 8px;  
+    gap: 14px;  
     width: fit-content;
 }
   
@@ -33,7 +33,6 @@
     background-color: #ffffff1a;
     border-radius: 10px;
     float: left;
-    margin-right: 16px;
     cursor: pointer;
     display: flex;
     height: 140px;
