@@ -414,7 +414,7 @@ let scale = 0;
 document.addEventListener("wheel", function (e) 
 {
   if (isMobile()) return;
-  if (window.innerWidth < 800) return;
+  if (window.innerWidth < 1200) return;
   scale += e.deltaY / 2.5;
   scale = Math.max(0, Math.min(scale, scrollableHeight));
 
