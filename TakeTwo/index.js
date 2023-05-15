@@ -415,11 +415,12 @@ document.addEventListener("wheel", function (e)
 {
   if (isMobile()) return;
   if (window.innerWidth < 1200) return;
-  scale += e.deltaY / 2.5;
+  scale += e.deltaY / 1.5;
   scale = Math.max(0, Math.min(scale, scrollableHeight));
 
   updateScrollBar(scale);
 
+  //smoothScrollTo(scale);
   window.scrollTo(0, scale);
 });
 

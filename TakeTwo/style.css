@@ -39,6 +39,8 @@ body
 body::before
 {
     position: absolute;
+    height: 160vh;
+    width: 100vw;
     content: "";
     background: var(--tile-color);
     top: 0;
@@ -300,10 +302,12 @@ header > div > div
     {
         display: none;
     }
+
     #scroll
     {
         display: none;
     }
+
     body 
     {
         overflow-x: hidden;
