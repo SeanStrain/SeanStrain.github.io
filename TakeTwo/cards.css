@@ -64,6 +64,8 @@
 .card:hover::before 
 {
     opacity: 1;
+    transition: box-shadow 1.5s ease-out;
+    box-shadow: 0px 0px 20px 20px #ffffff0f;
 }
 
 .card:hover > .card-content > .card-image > i 
@@ -75,6 +77,7 @@
 .card::before,
 .card::after 
 {
+    transition: box-shadow 1.5s ease-out;
     box-shadow: red 0px 0px 0px 0px;
     border-radius: inherit;
     content: "";
@@ -89,6 +92,7 @@
 
 .card::before 
 {
+    transition: box-shadow 1.5s ease-out;
     background: radial-gradient(
         600px circle at var(--mouse-x) var(--mouse-y), 
         #ffffff0f,
@@ -100,7 +104,7 @@
 .card::after 
 {  
     background: radial-gradient(
-        450px circle at var(--mouse-x) var(--mouse-y), 
+        300px circle at var(--mouse-x) var(--mouse-y), 
         #870000,
         transparent 40%
     );
