@@ -329,6 +329,7 @@ header > div > div
 
     .toggle-menu > span
     {
+        scale: 1.5;
         mix-blend-mode: normal;
     }
     #about
