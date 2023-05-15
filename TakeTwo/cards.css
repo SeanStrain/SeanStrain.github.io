@@ -27,7 +27,7 @@
     .card-image > i 
     {
         transition: transform 0.3s ease-in !important;
-        font-size: 4em !important;
+        font-size: 3em !important;
         opacity: 0.25 !important;
     }
 }
