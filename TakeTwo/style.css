@@ -373,6 +373,7 @@ header > div > div
 #title-border
 {
     height: fit-content;
+    text-shadow: #e6e6e9 0px 0px 0px;
     padding: 2rem;
 }
 
@@ -458,6 +459,7 @@ header > div > div
     width: 0px;
     background-color: var(--text-color);
     z-index: 1;
+    box-shadow: #e6e6e9 0px 0px 40px;
 }
 #title-border-line-1
 {
