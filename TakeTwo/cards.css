@@ -13,6 +13,25 @@
     }
 }
 
+@media screen and (max-width: 500px) 
+{
+    #cards
+    {
+        gap: 7px !important;  
+    }
+    .card
+    {
+        height: 90px !important;
+        width: 90px !important;
+    }
+    .card-image > i 
+    {
+        transition: transform 0.3s ease-in !important;
+        font-size: 4em !important;
+        opacity: 0.25 !important;
+    }
+}
+
 #cards 
 {
     display: flex;

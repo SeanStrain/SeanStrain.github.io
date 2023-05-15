@@ -281,6 +281,7 @@ header > div > div
     #title-wrapper-wrapper
     {
         display: flex;
+        width: 100%;
         flex-wrap: wrap;
         justify-content: center;
     }
@@ -329,6 +330,40 @@ header > div > div
     .toggle-menu > span
     {
         mix-blend-mode: normal;
+    }
+    #about
+    {
+        height: unset !important;
+        min-height: unset !important;
+    }
+}
+
+@media only screen and (max-width: 500px) 
+{
+    #title-wrapper
+    {
+        min-width: 0;
+        margin: 30vh 0 2rem 0;
+    }
+    #title-border
+    {
+        padding: 1rem !important;
+    }
+    #title
+    {
+        min-width: 250px;
+    }
+    .large-text
+    {
+        font-size: 2.25rem;
+    }
+    .medium-text
+    {
+        font-size: 1.5rem;
+    }
+    .small-text
+    {
+        font-size: 0.9rem;
     }
 }
 
