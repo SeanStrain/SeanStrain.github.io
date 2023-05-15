@@ -320,6 +320,16 @@ header > div > div
         overflow-x: hidden;
         overflow-y: scroll;
     }
+
+    header
+    {
+        mix-blend-mode: normal;
+    }
+
+    .toggle-menu > span
+    {
+        mix-blend-mode: normal;
+    }
 }
 
 #title-border
