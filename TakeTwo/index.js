@@ -114,6 +114,7 @@ function getMouseY() { return y; }
 let mayHover = true;
 function hover()
 {
+    return;
     setInterval(() =>
     {
         if (!mayHover) { return; }
