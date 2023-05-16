@@ -19,9 +19,9 @@ function init()
                 {
                         transform: "translate(0, 0)",
                         opacity: 1,
-                        duration: 1,
+                        duration: 1.5,
                 })
-            }, 500);
+            }, 400);
 
             animateLines();
             setTimeout(() => {typeSubtitle()}, 2500);
