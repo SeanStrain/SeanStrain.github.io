@@ -100,7 +100,6 @@ a
 {
     font-size: max(6dvw,44px);
 }
-
 .medium-large-text
 {
     font-size: max(4.5dvw,38px);
@@ -109,7 +108,6 @@ a
 {
     font-size: max(2.3dvw,32px);
 }
-
 .small-text
 {
     font-size: max(1.2dvw, 20px);
@@ -118,6 +116,12 @@ a
 {
     font-size: 16px;
     color: var(--slight-fade);
+}
+
+.title-text
+{
+    justify-content: center;
+    text-align: center;
 }
 /* end font-sizes */
 
@@ -290,12 +294,6 @@ a
     user-select: none;
     opacity: 0;
     transform: translateY(40px) rotateX(309deg);
-}
-
-.title-text
-{
-    justify-content: center;
-    text-align: center;
 }
 
 .subtitle

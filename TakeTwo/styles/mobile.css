@@ -65,6 +65,10 @@
         -ms-grid-columns: 1fr !important;
         grid-template-columns: 1fr !important;
     }
+    #about
+    {
+        top: -4dvh !important;
+    }
 }
 
 @media only screen and (max-width: 500px) 
