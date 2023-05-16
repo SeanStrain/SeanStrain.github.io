@@ -98,19 +98,19 @@ a
 /* font-sizes */
 .large-text
 {
-    font-size: max(6dvw,44px);
+    font-size: min(max(6dvw, 44px), 150px);
 }
 .medium-large-text
 {
-    font-size: max(4.5dvw,38px);
+    font-size: min(max(4.5dvw, 38px), 100px);
 }
 .medium-text
 {
-    font-size: max(2.3dvw,32px);
+    font-size: min(max(2.3dvw, 32px), 60px);
 }
 .small-text
 {
-    font-size: max(1.2dvw, 20px);
+    font-size: min(max(1.2dvw, 20px), 40px);
 }
 .tiny-text
 {
