@@ -68,6 +68,11 @@
     #about
     {
         top: -4dvh !important;
+        padding: 6rem 0 6rem 0 !important;
+    }
+    #about-title
+    {
+        font-size: max(6dvw,44px);
     }
 }
 
