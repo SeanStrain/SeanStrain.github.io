@@ -60,10 +60,10 @@
         scale: 1.5;
         mix-blend-mode: difference;
     }
-    #about
+    #about-container
     {
-        height: unset !important;
-        min-height: unset !important;
+        -ms-grid-columns: 1fr !important;
+        grid-template-columns: 1fr !important;
     }
 }
 

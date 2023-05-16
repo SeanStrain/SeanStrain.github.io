@@ -1,7 +1,6 @@
 let ready = false;
 function init()
 {
-    console.log("init");
     $(this).scrollTop(0);
 
     let interval = setInterval(() =>
@@ -27,7 +26,6 @@ function init()
             setTimeout(() => {typeSubtitle()}, 2500);
         }
     }, 1);
-
 
 }
 
@@ -430,31 +428,151 @@ function typeSubtitle()
     setTimeout(typeSubtitle, timeout);
 }
 
+// Morph-text - Derived from https://codepen.io/alvarotrigo/pen/eYEqPZa
+const elts = {
+    text1: document.getElementById("morph-text1"),
+    text2: document.getElementById("morph-text2")
+};
+
+const texts = [
+    "Passionate",
+    "About",
+    "Programming",
+    "Passionate",
+    "About",
+    "Design",
+    "Passionate",
+    "About",
+    "Teaching",
+];
+
+const morphTime = 1.5;
+const cooldownTime = 0.9;
+
+let textIndex = texts.length - 1;
+let time = new Date();
+let morph = 0;
+let cooldown = cooldownTime;
+
+function doMorph() 
+{
+    morph -= cooldown;
+    cooldown = 0;
+
+    let fraction = morph / morphTime;
+
+    if (fraction > 1) {
+        cooldown = cooldownTime;
+        fraction = 1;
+    }
+
+    setMorph(fraction);
+}
+
+function setMorph(fraction) 
+{
+    elts.text2.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+    elts.text2.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
+
+    fraction = 1 - fraction;
+    elts.text1.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+    elts.text1.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
+
+    elts.text1.textContent = texts[textIndex % texts.length];
+    elts.text2.textContent = texts[(textIndex + 1) % texts.length];
+}
+
+function doCooldown() 
+{
+    morph = 0;
+
+    elts.text2.style.filter = "";
+    elts.text2.style.opacity = "100%";
+
+    elts.text1.style.filter = "";
+    elts.text1.style.opacity = "0%";
+}
+
+let firstRun = true;
+function morphAnimate() 
+{
+    let newTime = new Date();
+    let shouldIncrementIndex = cooldown > 0;
+    let dt = (newTime - time) / 1000;
+    time = newTime;
+
+    if (firstRun) 
+    {
+        newTime = new Date();
+        shouldIncrementIndex = cooldown > 0;
+        dt = (newTime - time) / 1000;
+
+        elts.text1.textContent = texts[textIndex % texts.length];
+        elts.text2.textContent = texts[(textIndex + 1) % texts.length];
+        firstRun = false;
+    }
+
+    requestAnimationFrame(morphAnimate);
+    cooldown -= dt;
+
+    if (cooldown <= 0) {
+        if (shouldIncrementIndex) {
+            textIndex++;
+        }
+
+        doMorph();
+    } else {
+        doCooldown();
+    }
+}
+
+
 // scroll bar:
 const bar = document.getElementById("bar");
 const scrollableHeight = document.body.scrollHeight - window.innerHeight;
 let scale = 0;
-
+let state = 0;
+const scrollToState1 = function() { 
+    updateScrollBar(innerHeight + 25);
+    smoothScrollTo(innerHeight + 25); 
+}
 document.addEventListener("wheel", function (e) 
 {
-  if (isMobile()) return;
-  if (window.innerWidth < 1200) return;
-  scale += e.deltaY / 1.2;
-  scale = Math.max(0, Math.min(scale, scrollableHeight));
+    if (isMobile()) return;
+    if (window.innerWidth < 1200) return;
 
-  updateScrollBar(scale);
+    // if (e.deltaY < 0) { state = Math.max(state - 1, 0); } else { state = Math.min(state + 1, 1); }
 
-  //smoothScrollTo(scale);
-  window.scrollTo(0, scale);
+    // switch (state)
+    // {
+    //     case 0:
+    //         updateScrollBar(0);
+    //         smoothScrollTo(0);
+    //         aboutButton.classList.remove("nav-on");
+    //         homeButton.classList.add("nav-on");
+    //         workButton.classList.remove("nav-on");
+    //         break;
+    //     case 1:
+    //         scrollToState1()
+    //         aboutButton.classList.add("nav-on");
+    //         homeButton.classList.remove("nav-on");
+    //         workButton.classList.remove("nav-on");
+    //         break;
+    // }
 
+    scale += e.deltaY / 1.2;
+    scale = Math.max(0, Math.min(scale, scrollableHeight));
+
+    updateScrollBar(scale);
+    smoothScrollTo(scale);
+    return false;
 });
-
 
 function updateScrollBar(inputScale)
 {
     scale = inputScale;
-    const scrollPercentage = (scale / scrollableHeight) * 100;
 
+    const scrollPercentage = (scale / scrollableHeight) * 100;
     const maxTop = 100 - (bar.clientHeight / document.getElementById("scroll").clientHeight) * 100;
   
     bar.style.top = `${Math.min(scrollPercentage, maxTop)}%`;
@@ -462,6 +580,7 @@ function updateScrollBar(inputScale)
 
 // scroll animations:
 const about = document.getElementById("about");
+const aboutTitle = document.getElementById("about-title");
 const observer = new IntersectionObserver((observation) => 
 {
     observation.forEach((element) =>
@@ -470,19 +589,26 @@ const observer = new IntersectionObserver((observation) =>
         {
             switch(element.target.id)
             {
-                case "about-scroll-flag":
+                case "about":
                     mayHover = false;
                     tiles.classList.add("tiles-scrolled-past");
                     about.classList.add("about-scrolled-to");
+                    morphAnimate();
+                    gsap.to(aboutTitle,
+                    {
+                        opacity: 1,
+                        duration: 1,
+                    });
                     break;
             }
         } else {
             switch(element.target.id)
             {
-                case "about-scroll-flag":
+                case "about":
                     mayHover = true;
                     tiles.classList.remove("tiles-scrolled-past");
                     about.classList.remove("about-scrolled-to");
+                    break;
             }
         }
         
@@ -510,8 +636,8 @@ homeButton.addEventListener("click", () =>
 });
 aboutButton.addEventListener("click", () =>
 {
-    smoothScrollTo(document.getElementById("about").offsetTop);
-    updateScrollBar(document.getElementById("about").offsetTop);
+    scrollToState1()
+
     
     aboutButton.classList.add("nav-on");
     homeButton.classList.remove("nav-on");
@@ -529,13 +655,29 @@ workButton.addEventListener("click", () =>
 
 
 // utility functions
+let currentScroll = scale;
+let targetScroll = y;
+const ease = 0.05; // this is the speed of the scroll
+
+function animateScroll() 
+{
+    currentScroll += (targetScroll - currentScroll) * ease;
+
+    if (Math.abs(currentScroll - targetScroll) < 0.1) 
+    {
+        currentScroll = targetScroll;
+        window.scroll(0, currentScroll, 'smooth');
+        return;
+    }
+    
+    window.scroll(0, currentScroll, 'smooth');
+    requestAnimationFrame(animateScroll);
+}
+
 function smoothScrollTo(y) 
 {
-    window.scrollTo({
-        top: y,
-        left: 0,
-        behavior: 'smooth'
-    });
+    targetScroll = y;
+    animateScroll();
 }
 
 function isMobile()
