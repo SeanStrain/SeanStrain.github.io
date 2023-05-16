@@ -27,12 +27,13 @@
     background: linear-gradient(to right, var(--back-color), #232526); 
     z-index: 2;
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: all 0.25s ease;
 }
 #cover.scrolled-to
 {
     opacity: 1;
-    transition: opacity 1s ease;
+    z-index: 3;
+    transition: all 0.25s ease;
 }
 
 #about.loaded
