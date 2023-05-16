@@ -593,6 +593,9 @@ const observer = new IntersectionObserver((observation) =>
                     mayHover = false;
                     tiles.classList.add("tiles-scrolled-past");
                     about.classList.add("about-scrolled-to");
+                    aboutButton.classList.add("nav-on");
+                    homeButton.classList.remove("nav-on");
+                    workButton.classList.remove("nav-on");
                     morphAnimate();
                     gsap.to(aboutTitle,
                     {
@@ -608,6 +611,9 @@ const observer = new IntersectionObserver((observation) =>
                     mayHover = true;
                     tiles.classList.remove("tiles-scrolled-past");
                     about.classList.remove("about-scrolled-to");
+                    aboutButton.classList.remove("nav-on");
+                    homeButton.classList.add("nav-on");
+                    workButton.classList.remove("nav-on");
                     break;
             }
         }
