@@ -5,7 +5,7 @@
 
 @media only screen and (max-width: 1200px) 
 {
-    #cards-wrapper
+    .cards-wrapper
     {
         display: flex;
         justify-content: center;
@@ -15,7 +15,7 @@
 
 @media screen and (max-width: 500px) 
 {
-    #cards
+    .cards
     {
         gap: 7px !important;  
     }
@@ -32,7 +32,7 @@
     }
 }
 
-#cards 
+.cards 
 {
     display: flex;
     flex-wrap: wrap;
@@ -43,14 +43,21 @@
     isolation: isolate;
 }
   
-#cards:hover > .card::after 
+.cards:hover > .card::after 
 {
     opacity: 1;
 }
-  
+
+.cards.loaded > .card
+{
+    transition: all 0.75s ease-in-out;
+    background-color: #ffffff1a;
+    opacity: 1;
+}
+
 .card 
 {
-    background-color: #ffffff1a;
+    background-color: var(--tile-color);
     border-radius: 10px;
     float: left;
     cursor: pointer;
@@ -59,7 +66,8 @@
     flex-direction: column;
     position: relative;
     width: 140px;  
-  }
+    opacity: 0;
+}
   
 .card:hover::before 
 {
@@ -109,7 +117,14 @@
     z-index: 1;
 }
 
-.card > .card-content 
+.cards.loaded > .card > .card-content
+{
+    transition: all 0.75s ease-in-out;
+    background-color: var(--card-color);
+    opacity: 1;
+}
+
+.card-content 
 {
     background-color: var(--card-color);
     border-radius: inherit;
@@ -155,4 +170,10 @@ i
 {
     align-items: flex-start;
     display: flex;
+}
+
+.card-big
+{
+    height: fill-available;
+    width: fill-available;
 }

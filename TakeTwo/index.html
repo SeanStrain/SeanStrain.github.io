@@ -4,6 +4,8 @@
     
     <head>
         <link rel="stylesheet" type="text/css" href="style.css">
+        <link rel="stylesheet" type="text/css" href="title-anim.css">
+        <link rel="stylesheet" type="text/css" href="mobile.css">
         <link rel="stylesheet" type="text/css" href="cards.css">
     </head>
 
@@ -79,28 +81,28 @@
                     </div>
                 </div>
 
-                <div id="cards-wrapper">
-                    <div id="cards">
+                <div class="cards-wrapper">
+                    <div id="cards" class="cards">
                         <a id="linkedin" class="card" href="https://www.linkedin.com/in/sean-strain-2b4279147/">
                             <div class="card-content">
-                            <div class="card-image">
-                                <i class="fa-brands fa-linkedin"></i>
-                            </div>
+                                <div class="card-image">
+                                    <i class="fa-brands fa-linkedin"></i>
+                                </div>
                             </div>
                         </a>
                         <a id="mail" class="card" href="mailto:seanstrainwork@gmail.com">
                             <div class="card-content">
-                            <div class="card-image">
-                                <i class="fa-solid fa-envelope"></i>
-                            </div>
+                                <div class="card-image">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
                             </div>
                         </a>
                         <a id="github" class="card" href="https://github.com/SeanStrain">
-                        <div class="card-content">
-                            <div class="card-image">
-                            <i class="fa-brands fa-github"></i>
+                            <div class="card-content">
+                                <div class="card-image">
+                                    <i class="fa-brands fa-github"></i>
+                                </div>
                             </div>
-                        </div>
                         </a>
                     </div>
                 </div>
@@ -111,31 +113,60 @@
 
         <div id="about" class="page">
             <div class="page-container">
-                <div class="medium-text" style="max-width: 50rem;">
-                    PASSIONATE ABOUT PROGRAMMING
+                <div id="about-title" class="medium-text scroll-animated">
+                    <div class="title-text">PASSIONATE ABOUT PROGRAMMING</div>
                 </div>
-                <div id="about-grid">
-                    <div class="about-item">
-                        <div class="small-text"><b>1st Class Master's</b> Degree in Informatics at the world-leading University of Edinburgh.</div>
+
+                <div class="cards-wrapper" style="display:none">
+                    <div class="cards loaded">
+                        <a id="" class="card card-big" href="https://www.linkedin.com/in/sean-strain-2b4279147/">
+                            <div class="card-content">
+                                <div class="card-image">
+                                    <i class="fa-brands fa-linkedin"></i>
+                                </div>
+                            </div>
+                        </a>
+                        <a id="" class="card card-big" href="mailto:seanstrainwork@gmail.com">
+                            <div class="card-content">
+                                <div class="card-image">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </div>
+                            </div>
+                        </a>
+                        <a id="" class="card card-big" href="https://github.com/SeanStrain">
+                            <div class="card-content">
+                                <div class="card-image">
+                                    <i class="fa-brands fa-github"></i>
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="about-item">
-                        <div class="small-text">University of Edinburgh <b>Outstanding Project</b> Award 21/22.</div>
-                    </div>
-                    <div class="about-item">
-                        <div class="small-text">Software Engineer at <b>Cadence Design Systems.</b></div>
-                    </div>
-                    <div class="about-item">
-                        <div class="small-text">2 Years experience in <b>Academic Research.</b></div>
-                    </div>
-                    <div class="about-item">
-                        <div class="small-text">Experienced <b>teacher and tutor</b> through Code Cadets Edinburgh.</div>
-                    </div>
-                    <div class="about-item">
-                        <div class="small-text">Proficient in 12+ programming languages, including <b>Python, JavaScript, Java, and the C family.</b></div>
+                </div>
+
+                <div style="display:none">
+                    <div id="about-grid">
+                        <div class="about-item">
+                            <div class="small-text"><b>1st Class Master's</b> Degree in Informatics at the world-leading University of Edinburgh.</div>
+                        </div>
+                        <div class="about-item">
+                            <div class="small-text">University of Edinburgh <b>Outstanding Project</b> Award 21/22.</div>
+                        </div>
+                        <div class="about-item">
+                            <div class="small-text">Software Engineer at <b>Cadence Design Systems.</b></div>
+                        </div>
+                        <div class="about-item">
+                            <div class="small-text">2 Years experience in <b>Academic Research.</b></div>
+                        </div>
+                        <div class="about-item">
+                            <div class="small-text">Experienced <b>teacher and tutor</b> through Code Cadets Edinburgh.</div>
+                        </div>
+                        <div class="about-item">
+                            <div class="small-text">Proficient in 12+ programming languages, including <b>Python, JavaScript, Java, and the C family.</b></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div id="about-scroll-flag"></div>
+            <div id="about-scroll-flag" class="scroll-animated"></div>
         </div>
         <div id="work" class="page">
             <div class="page-container">

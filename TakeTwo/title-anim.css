@@ -1,0 +1,116 @@
+#title-border
+{
+    height: fit-content;
+    text-shadow: #e6e6e9 0px 0px 0px;
+    padding: 2rem;
+}
+
+.title-border-corner
+{
+    position: absolute;
+    margin: 0px;
+    opacity: 0;
+    background-color: var(--text-color);
+}
+
+#title-border-corner-1
+{
+    top: 0;
+    left: 0;
+    float: left;
+    height: 0px;
+    width: 5px;
+}
+#title-border-corner-2
+{
+    float: left;
+    top: 0;
+    left: 0px;
+    height: 5px;
+    width: 0px;
+}
+#title-border-corner-3
+{
+    float: right;
+    top: 0;
+    right: 0px;
+    height: 30px;
+    width: 5px;
+}
+#title-border-corner-4
+{
+    float: right;
+    top: 0;
+    right: 0px;
+    height: 5px;
+    width: 30px;
+}
+#title-border-corner-5
+{
+    float: left;
+    bottom: 0px;
+    left: 0px;
+    height: 30px;
+    width: 5px;
+}
+#title-border-corner-6
+{
+    float: left;
+    bottom: 0px;
+    left: 0px;
+    height: 5px;
+    width: 30px;
+}
+#title-border-corner-7
+{
+    float: right;
+    bottom: 0px;
+    right: 0px;
+    height: 0px;
+    width: 5px;
+}
+#title-border-corner-8
+{
+    float: right;
+    bottom: 0px;
+    right: 0px;
+    height: 5px;
+    width: 0px;
+}
+
+.title-border-line
+{
+    position: absolute;
+    display: inline;
+    margin: 0;
+    height: 0px;
+    width: 0px;
+    background-color: var(--text-color);
+    z-index: 1;
+    box-shadow: #e6e6e9 0px 0px 40px;
+}
+#title-border-line-1
+{
+    left: 0;
+    float: left;
+    height: 0px;
+    width: 5px;
+}
+#title-border-line-2
+{
+    float: left;
+    height: 5px;
+    width: 0px;
+}
+#title-border-line-3
+{
+    float: right;
+    height: 0px;
+    width: 5px;
+}
+#title-border-line-4
+{
+    float: right;
+    height: 5px;
+    width: 0px;
+}

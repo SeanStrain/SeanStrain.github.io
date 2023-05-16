@@ -1,10 +1,38 @@
-$(document).ready( function() {$(this).scrollTop(0);}); // on load, scroll to top
-window.onbeforeunload = function() {$(this).scrollTop(0);} // refresh
+let ready = false;
+function init()
+{
+    console.log("init");
+    $(this).scrollTop(0);
 
-const body = document.getElementsByTagName("body")[0];
-const homeBackground = document.getElementById("home-background");
-homeBackground.classList.add("loaded");
+    let interval = setInterval(() =>
+    {
+        if (ready)
+        {
+            clearInterval(interval);
+            body.classList.add("loaded");
+            cards.classList.add("loaded");
+            about.classList.add("loaded");
+            header.classList.add("loaded");
+            setTimeout(() => 
+            {
+                gsap.to(title,
+                {
+                        transform: "translate(0, 0)",
+                        opacity: 1,
+                        duration: 1,
+                })
+            }, 500);
 
+            animateLines();
+            setTimeout(() => {typeSubtitle()}, 2500);
+        }
+    }, 1);
+
+
+}
+
+$(document).ready( function() { init(); });
+window.onbeforeunload = function() { init(); } // refresh
 
 // Home page animations:
 const title = document.getElementById("title");
@@ -12,12 +40,8 @@ const home = document.getElementById("home");
 const tiles = document.getElementById("tiles");
 const isReduced = window.matchMedia(`(prefers-reduced-motion: reduce)`) === true || window.matchMedia(`(prefers-reduced-motion: reduce)`).matches === true;
 
-gsap.to(title,
-{
-        transform: "translate(0, 0)",
-        opacity: 1,
-        duration: 1,
-})
+const body = document.getElementsByTagName("body")[0];
+const header = document.getElementById("header");
 
 // grid on home: - derived from https://www.youtube.com/@Hyperplexed - https://codepen.io/Hyperplexed/pen/zYWvXMM
 const tileSize = 50;
@@ -51,6 +75,7 @@ const createGrid = () =>
     tiles.style.setProperty("--rows", rows);
     
     createTiles(columns * rows);
+    ready = true;
 }
 createGrid();
 
@@ -93,7 +118,7 @@ linkedIn.onclick = () => { window.open("https://www.linkedin.com/in/sean-strain-
 mail.onclick = () => { window.open("mailto:seanstrainwork@gmail.com", "_blank"); };
 github.onclick = () => { window.open("https://github.com/SeanStrain", "_blank"); };
 
-// tile animations:
+// tile animations - disabled for performance reasons:
 var hoveredTiles = [];
 var toSplice = [];
 var justPushed = [];
@@ -185,7 +210,7 @@ function animateLines()
                     break;
             }
         });
-    } else {
+    } else { // otherwise, animate
         lines.forEach((line, index) =>
         {
             switch(index)
@@ -195,7 +220,7 @@ function animateLines()
                     break;
                 case 1:
                     line.style.top = "0";
-                    line.style.left = "-45px";
+                    line.style.left = "0px";
                     break;
                 case 2:
                     line.style.bottom = "0";
@@ -217,12 +242,12 @@ function animateLines()
                 const heightProperty = window.getComputedStyle(document.getElementById('title-wrapper')).getPropertyValue("height");
                 const height = parseFloat(heightProperty.substring(0, heightProperty.length - 2));
                 const widthProperty = window.getComputedStyle(document.getElementById('title-wrapper')).getPropertyValue("width");
-                const width = parseFloat(widthProperty.substring(0, widthProperty.length - 2))+45;
+                const width = parseFloat(widthProperty.substring(0, widthProperty.length - 2));
 
                 let duration = 0.85;
                 let ease1 = "power2.out";
                 let ease2 = "power2.inout";
-                let duration2 = 0.85;
+                let duration2 = 1;
                 let delay1 = 100;
                 let delay2 = 150;
                 switch(index)
@@ -365,7 +390,6 @@ function animateLines()
         }, 250);
     }
 }
-animateLines();
 
 // type the subtitle
 // loop through the strings: write, delete, next
@@ -405,7 +429,6 @@ function typeSubtitle()
   
     setTimeout(typeSubtitle, timeout);
 }
-setTimeout(() => {typeSubtitle()}, 1250);
 
 // scroll bar:
 const bar = document.getElementById("bar");
@@ -423,7 +446,9 @@ document.addEventListener("wheel", function (e)
 
   //smoothScrollTo(scale);
   window.scrollTo(0, scale);
+
 });
+
 
 function updateScrollBar(inputScale)
 {
@@ -449,6 +474,7 @@ const observer = new IntersectionObserver((observation) =>
                     mayHover = false;
                     tiles.classList.add("tiles-scrolled-past");
                     about.classList.add("about-scrolled-to");
+                    break;
             }
         } else {
             switch(element.target.id)
@@ -462,8 +488,11 @@ const observer = new IntersectionObserver((observation) =>
         
     });
 });
-const aboutScrollFlag = document.getElementById("about-scroll-flag");
-observer.observe(aboutScrollFlag);
+const scrollAnimated = [...document.getElementsByClassName("scroll-animated")];
+scrollAnimated.forEach((element) =>
+{
+    observer.observe(element);
+});
 
 // nav bar:
 const homeButton = document.getElementById("home-button");
