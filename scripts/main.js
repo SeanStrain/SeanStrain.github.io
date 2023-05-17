@@ -694,6 +694,14 @@ circleShooterCard.onclick = () => { window.open("https://seanstrain.github.io/Ga
 presentationsCard.onclick = () => { window.open("https://seanstrain.github.io/Presentations/WhyICode/", "_blank"); };
 displaceCard.onclick = () => { window.open("https://github.com/SeanStrain/DisplacementSphere", "_blank"); };
 
+const seeMyWorkButton = document.getElementById("see-work-button");
+
+seeMyWorkButton.onclick = () => 
+{ 
+    updateScrollBar(document.getElementById("work-page").offsetTop);
+    smoothScrollTo(document.getElementById("work-page").offsetTop); 
+};
+
 // utility functions
 let currentScroll = scale;
 let targetScroll = y;
