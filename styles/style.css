@@ -215,6 +215,14 @@ a
     z-index: 3;
     margin-left: 9%;
 }
+#home-page-scroll-flag
+{
+    position: absolute;
+    top: 100px;
+    left: 0;
+    width: 10px;
+    height: 10px;
+}
 
 @keyframes background-pan 
 {

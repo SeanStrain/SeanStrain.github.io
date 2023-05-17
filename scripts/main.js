@@ -591,7 +591,7 @@ const observer = new IntersectionObserver((observation) =>
         {
             switch(element.target.id)
             {
-                case "home-page":
+                case "home-page-scroll-flag":
                     aboutButton.classList.remove("nav-on");
                     homeButton.classList.add("nav-on");
                     workButton.classList.remove("nav-on");
