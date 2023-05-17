@@ -591,33 +591,44 @@ const observer = new IntersectionObserver((observation) =>
         {
             switch(element.target.id)
             {
+                case "home-page":
+                    aboutButton.classList.remove("nav-on");
+                    homeButton.classList.add("nav-on");
+                    workButton.classList.remove("nav-on");
+                    break;
                 case "about":
                     mayHover = false;
                     tiles.classList.add("tiles-scrolled-past");
                     if (!$.browser.mozilla) about.classList.add("about-scrolled-to");
                     cover.classList.add("scrolled-to");
-                    aboutButton.classList.add("nav-on");
-                    homeButton.classList.remove("nav-on");
-                    workButton.classList.remove("nav-on");
                     morphAnimate();
                     gsap.to(aboutTitle,
                     {
                         opacity: 1,
                         duration: 1,
                     });
+                    aboutButton.classList.add("nav-on");
+                    homeButton.classList.remove("nav-on");
+                    workButton.classList.remove("nav-on");
+                    break;
+                case "work-page":
+                    aboutButton.classList.remove("nav-on");
+                    homeButton.classList.remove("nav-on");
+                    workButton.classList.add("nav-on");
                     break;
             }
         } else {
             switch(element.target.id)
             {
+                case "home-page":
+                    break;
                 case "about":
                     mayHover = true;
                     tiles.classList.remove("tiles-scrolled-past");
                     about.classList.remove("about-scrolled-to");
                     cover.classList.remove("scrolled-to");
-                    aboutButton.classList.remove("nav-on");
-                    homeButton.classList.add("nav-on");
-                    workButton.classList.remove("nav-on");
+                    break;
+                case "work-page":
                     break;
             }
         }
@@ -655,14 +666,33 @@ aboutButton.addEventListener("click", () =>
 });
 workButton.addEventListener("click", () =>
 {
-    smoothScrollTo(document.getElementById("work").offsetTop);
-    updateScrollBar(document.getElementById("work").offsetTop);
+    smoothScrollTo(document.getElementById("work-page").offsetTop);
+    updateScrollBar(document.getElementById("work-page").offsetTop);
 
     aboutButton.classList.remove("nav-on");
     homeButton.classList.remove("nav-on");
     workButton.classList.add("nav-on");
 });
 
+const uoeCard = document.getElementById("uoe-card");
+const tulipsCard = document.getElementById("tulips-card");
+const cadenceCard = document.getElementById("cadence-card");
+const codeCadetsCard = document.getElementById("code-cadets-card");
+
+const strangeCard = document.getElementById("strange-card");
+const circleShooterCard = document.getElementById("circle-shooter-card");
+const presentationsCard = document.getElementById("presentations-card");
+const displaceCard = document.getElementById("displace-card");
+
+uoeCard.onclick = () => { window.open("https://project-archive.inf.ed.ac.uk/ug4/20223215/ug4_proj.pdf", "_blank"); };
+tulipsCard.onclick = () => { window.open("https://groups.inf.ed.ac.uk/tulips/people.html", "_blank"); };
+cadenceCard.onclick = () => { window.open("https://www.cadence.com/en_US/home.html", "_blank"); };
+codeCadetsCard.onclick = () => { window.open("https://www.codecadets.co.uk/", "_blank"); };
+
+strangeCard.onclick = () => { window.open("https://seanstrain.github.io/Attractors/attractors", "_blank"); };
+circleShooterCard.onclick = () => { window.open("https://seanstrain.github.io/Games/circleshooter/circleshooter", "_blank"); };
+presentationsCard.onclick = () => { window.open("https://seanstrain.github.io/Presentations/WhyICode/", "_blank"); };
+displaceCard.onclick = () => { window.open("https://github.com/SeanStrain/DisplacementSphere", "_blank"); };
 
 // utility functions
 let currentScroll = scale;

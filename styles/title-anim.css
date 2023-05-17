@@ -1,3 +1,8 @@
+:root
+{
+    --slight-gold: #f8f6d6;
+}
+
 #title-border
 {
     height: fit-content;
@@ -87,7 +92,7 @@
     width: 0px;
     background-color: var(--text-color);
     z-index: 1;
-    box-shadow: #e6e6e9 0px 0px 40px;
+    box-shadow: var(--slight-gold) 0px 0px 40px;
 }
 #title-border-line-1
 {

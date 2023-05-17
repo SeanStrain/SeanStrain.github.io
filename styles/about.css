@@ -107,21 +107,7 @@
 
 #about-container
 {
-    position: relative;
     top:-10dvh;
-    display: -ms-grid;
-    display: grid;
-    margin-top: 4rem;
-    align-items: start;
-    align-content: start;
-    grid-auto-columns: 1fr;
-    grid-column-gap: 4rem;
-    grid-row-gap: 16px;
-    -ms-grid-columns: 1fr 1fr;
-    grid-template-columns: 1fr 1fr;
-    -ms-grid-rows: auto auto;
-    grid-template-rows: auto auto;
-    max-width: 1920px;
     z-index: 3;
 }
 
@@ -136,9 +122,10 @@
 }
 .about-card:hover
 {
-    scale: 1.05;
+    scale: 1.025;
     transition: all 0.5s ease;
     cursor: pointer;
+    box-shadow: var(--slight-gold) 0px 0px 10px;
 }
 .about-card:hover > .about-desc > .about-header > *
 {

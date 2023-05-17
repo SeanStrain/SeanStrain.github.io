@@ -45,7 +45,7 @@
         </header>
 
         <div id="home-background"></div>
-        <div id="home-page" class="page">
+        <div id="home-page" class="page scroll-animated">
             <div id="tiles"></div>
             <div id="home">
                 <div id="title-wrapper-wrapper">
@@ -152,22 +152,22 @@
 
             </div>
 
-            <div id="about-container" class="page-container tiny-text">
+            <div id="about-container" class="page-container grid-container tiny-text">
                 <div>
                     <div class="tiny-text">
                         WHO I AM
                     </div>
-                    <div class="medium-text" style="color: var(--text-color);padding-right:40px; margin-bottom: 60px;">
+                    <div class="medium-text grid-title">
                         PROVEN EXCELLENCE
                     </div>
-                    <div class="about-card">
+                    <div id="uoe-card" class="about-card">
                         <img src="images\old_college.jpg" class="about-image">
                         <div class="about-desc">
                             <div class="about-header small-text"><i class="fa-solid fa-university"></i><span>&nbsp;Academic</span></div>
                             <span>1st Class Master's Degree in Informatics with</span> <a href="#to-be-named" style="text-decoration:underline">academic awards of excellence</a> <span>at the world-leading University of Edinburgh.</span>
                         </div>
                     </div>
-                    <div class="about-card">
+                    <div id="tulips-card" class="about-card">
                         <img src="images\tulips.png" class="about-image">
                         <div class="about-desc">
                             <div class="about-header small-text"><i class="fa-solid fa-graduation-cap"></i><span>&nbsp;Scholarly</span></div>
@@ -176,14 +176,14 @@
                     </div>
                 </div>
                 <div>
-                    <div class="about-card">
+                    <div id="cadence-card" class="about-card">
                         <img src="images\cadence.jpg" class="about-image">
                         <div class="about-desc">
                             <div class="about-header small-text"><i class="fa-solid fa-user-tie"></i><span>&nbsp;Professional</span></div>
                             Level Two Software Engineer at Cadence Design Systems.
                         </div>
                     </div>
-                    <div class="about-card">
+                    <div id="code-cadets-card" class="about-card">
                         <img src="images\code_cadets.png" class="about-image">
                         <div class="about-desc">
                             <div class="about-header small-text"><i class="fa-solid fa-person-chalkboard"></i><span>&nbsp;An Educator</span></div>
@@ -199,9 +199,50 @@
             <div id="work-scroll-flag"></div>
         </div>
 
-        <div id="to-be-named" class="page-container"></div>
+        <div id="work-page" class="page scroll-animated">
+            <div id="work-container" class="page-container grid-container tiny-text">
+                <div>
+                    <div id="strange-card" class="about-card">
+                        <img src="images\lorenz.png" class="about-image">
+                        <div class="about-desc">
+                            <div class="about-header small-text"><span>Strange Attractors</span></div>
+                            <span>An interactive, browser-based simulation of the most famous <i>strange attractors</i> - this project affirmed my love for mathematics.</span>
+                        </div>
+                    </div>
+                    <div id="circle-shooter-card" class="about-card">
+                        <img src="images\circle_shooter.png" class="about-image">
+                        <div class="about-desc">
+                            <div class="about-header small-text"><span>Circle Shooter</span></div>
+                            An Asteroids-inspired game written in JavaScript. I made this game to learn about the HTML5 canvas and JavaScript.
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="tiny-text">
+                        MY PROJECTS
+                    </div>
+                    <div class="medium-text grid-title">
+                        WORKS OF PASSION
+                    </div>
+                    <div id="presentations-card" class="about-card">
+                        <img src="images\why_code.png" class="about-image">
+                        <div class="about-desc">
+                            <div class="about-header small-text"><span>Presentations</span></div>
+                            I regularly give presentations in my classes at Code Cadets. 
+                        </div>
+                    </div>
+                    <div id="displace-card" class="about-card">
+                        <img src="images\displace.jpeg" class="about-image">
+                        <div class="about-desc">
+                            <div class="about-header small-text"><span>Displacement Spheres</span></div>
+                            An extension to the PBRT-v3 renderer that allows for the creation of displacement spheres. Written in C++.    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <svg id="filters"> <!-- https://codepen.io/alvarotrigo/pen/eYEqPZa -->
+        <svg id="filters" style="display:none"> <!-- https://codepen.io/alvarotrigo/pen/eYEqPZa -->
             <defs>
                 <filter id="threshold">
                     <feColorMatrix in="SourceGraphic" type="matrix" values="1 0 0 0 0
