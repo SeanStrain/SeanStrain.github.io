@@ -50,7 +50,7 @@
 
 .cards.loaded > .card
 {
-    transition: all 0.75s ease-in-out;
+    transition: all 2s ease-in-out;
     background-color: #ffffff1a;
     opacity: 1;
 }
