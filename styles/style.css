@@ -467,3 +467,24 @@ a
     margin-bottom: 60px; 
     text-shadow: var(--slight-gold) 0px 0px 3px;
 }
+
+.section
+{
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    min-width: 100dvw;
+    font-family: 'Montserrat-Regular', sans-serif;
+}
+
+#skillset
+{
+    background: var(--back-color); 
+    background: -webkit-linear-gradient(to right, var(--back-color), #232526); 
+    background: linear-gradient(to right, var(--back-color), #232526); 
+}
+#skillset-wrapper
+{
+    padding: 120px 72px;
+
+}
