@@ -1,13 +1,13 @@
-@font-face {
-    font-family: 'Montserrat-Regular';
-    src: url(../../SeanStrain.github.io/fonts/Montserrat-Regular.ttf);
-}
-
 :root
 {
     font-family: Arial, Helvetica, sans-serif; 
     --white: #e6e6e9;
     --black: #060608;
+}
+
+@font-face {
+    font-family: 'Montserrat-Regular';
+    src: url(../../SeanStrain.github.io/fonts/Montserrat-Regular.ttf);
 }
 
 /* general css*/

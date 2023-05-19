@@ -1,0 +1,63 @@
+.menu 
+{
+    position: absolute;
+    border-radius: 15px;
+    border: #242A33 2px solid;
+    background-color: #242A33;
+    color: var(--text-color);
+    margin: 15px;
+    padding: 15px;
+    right: 0;
+    top: 45px;
+    display: none;
+}
+
+.menu.open 
+{
+    display: block;
+}
+
+.menu-item-wrapper
+{
+    padding-bottom: 10px;
+}
+
+.toggle-menu
+{
+    position: absolute;
+    right: 20px;
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+}
+
+
+.toggle-menu > div
+{
+    color: var(--text-color);
+    position: absolute;
+    transform: translate(-300%, calc(-60px - 50%));
+    transition: transform 0.5s ease;
+}
+
+.toggle-menu:hover > div
+{
+    transform: translate(-300%, -50%);
+    transition: transform 0.5s ease;
+}
+
+.toggle-menu > span
+{
+    position: absolute;
+    display: block;
+    height: 4px;
+    width: 34px;
+    background-color: var(--text-color);
+    transform: translateY(calc(-150px - 50%));
+}
+.toggle-menu > span.active
+{
+    transform: rotate3d(0, 0, 1, 45deg) translateY(calc(-60px - 50%));
+}

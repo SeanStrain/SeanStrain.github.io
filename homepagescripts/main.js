@@ -689,9 +689,9 @@ tulipsCard.onclick = () => { window.open("https://groups.inf.ed.ac.uk/tulips/peo
 cadenceCard.onclick = () => { window.open("https://www.cadence.com/en_US/home.html", "_blank"); };
 codeCadetsCard.onclick = () => { window.open("https://www.codecadets.co.uk/", "_blank"); };
 
-strangeCard.onclick = () => { window.open("https://seanstrain.github.io/Attractors/attractors", "_blank"); };
-circleShooterCard.onclick = () => { window.open("https://seanstrain.github.io/Games/circleshooter/circleshooter", "_blank"); };
-presentationsCard.onclick = () => { window.open("https://seanstrain.github.io/Presentations/WhyICode/", "_blank"); };
+strangeCard.onclick = () => { window.open("https://seanstrain.github.io/attractors/attractors", "_blank"); };
+circleShooterCard.onclick = () => { window.open("https://seanstrain.github.io/games/circleshooter/circleshooter", "_blank"); };
+presentationsCard.onclick = () => { window.open("https://seanstrain.github.io/presentations/WhyICode/", "_blank"); };
 displaceCard.onclick = () => { window.open("https://github.com/SeanStrain/DisplacementSphere", "_blank"); };
 
 const seeMyWorkButton = document.getElementById("see-work-button");
