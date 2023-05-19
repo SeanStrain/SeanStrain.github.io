@@ -103,12 +103,12 @@ function resetVariables()
 {
     var settings = 
     {
-        lineWidth: 2,
-        lineBlur: 5,
+        lineWidth: 3,
+        lineBlur: 10,
         increment: 0.06,
         innerCircleRadius: 100,
         numberOfLines: 12,
-        lineSeparation: 15,
+        lineSeparation: 25,
         spinRate: 3,
         spinDirection: 1,
     };
@@ -122,7 +122,7 @@ function resetVariables()
     document.getElementById("spin-direction").value = settings.spinDirection;
 
     let initialTextSize = 90;
-    let initialTextBlur = 5;
+    let initialTextBlur = 7;
     document.getElementById("percentage").style.setProperty("--text-size", initialTextSize + "px");
     document.getElementById("percentage").style.setProperty("--text-blur", initialTextBlur + "px");
 
