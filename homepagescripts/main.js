@@ -683,6 +683,7 @@ const strangeCard = document.getElementById("strange-card");
 const circleShooterCard = document.getElementById("circle-shooter-card");
 const presentationsCard = document.getElementById("presentations-card");
 const displaceCard = document.getElementById("displace-card");
+const animationsCard = document.getElementById("animations-card");
 
 uoeCard.onclick = () => { window.open("https://project-archive.inf.ed.ac.uk/ug4/20223215/ug4_proj.pdf", "_blank"); };
 tulipsCard.onclick = () => { window.open("https://groups.inf.ed.ac.uk/tulips/people.html", "_blank"); };
@@ -693,6 +694,7 @@ strangeCard.onclick = () => { window.open("https://seanstrain.github.io/attracto
 circleShooterCard.onclick = () => { window.open("https://seanstrain.github.io/games/circleshooter/circleshooter", "_blank"); };
 presentationsCard.onclick = () => { window.open("https://seanstrain.github.io/presentations/WhyICode/", "_blank"); };
 displaceCard.onclick = () => { window.open("https://github.com/SeanStrain/DisplacementSphere", "_blank"); };
+animationsCard.onclick = () => { window.open("https://seanstrain.github.io/animations/synchronisedcircles", "_blank"); };
 
 const seeMyWorkButton = document.getElementById("see-work-button");
 
