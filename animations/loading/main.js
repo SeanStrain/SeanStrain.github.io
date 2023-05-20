@@ -48,11 +48,10 @@ function getSettingsFromHTML()
     };
     return settings;
 }
+
 const variables = document.getElementsByClassName("variable");
-for (let variable of variables)
-{
-    variable.oninput = () => { getSettingsFromHTML() };
-}
+for (let variable of variables) { variable.oninput = () => { getSettingsFromHTML() }; }
+document.getElementById("spin-direction").addEventListener("input", (getSettingsFromHTML));
 getSettingsFromHTML();
 
 document.getElementById("text-size").oninput = () => 
