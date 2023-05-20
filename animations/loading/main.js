@@ -11,29 +11,57 @@ function resize()
     midScreen = {x: innerWidth/2, y: innerHeight/2};
 }
 resize();
+addEventListener("resize", (event) => { resize(); });
 
-addEventListener("resize", (event) =>
+var settings;
+function getSettingsFromHTML() 
 {
-    resize();
-});
+    settings = 
+    {
+        lineWidth: parseFloat(document.getElementById("line-width").value),
+        lineBlur: parseFloat(document.getElementById("line-blur").value),
+        increment: parseFloat(document.getElementById("increment").value),
+        innerCircleRadius: parseFloat(document.getElementById("inner-circle-radius").value),
+        numberOfLines: parseInt(document.getElementById("number-of-lines").value),
+        lineSeparation: parseFloat(document.getElementById("line-separation").value),
+        spinRate: parseFloat(document.getElementById("spin-rate").value),
+        spinDirection: parseInt(document.getElementById("spin-direction").value),
+        missEveryXLines: parseInt(document.getElementById("miss-every-x-lines").value),
+    };
+    return settings;
+}
+const variables = document.getElementsByClassName("variable");
+for (let variable of variables)
+{
+    variable.oninput = () => { getSettingsFromHTML() };
+}
+getSettingsFromHTML();
 
+document.getElementById("text-size").oninput = () => 
+{
+    let textSize = parseFloat(document.getElementById("text-size").value);
+    document.getElementById("percentage").style.setProperty("--text-size", textSize + "px");
+};
 
-let percentage = 0;
-let initialRadius = 100;
+document.getElementById("text-blur").oninput = () =>
+{
+    let textBlur = parseFloat(document.getElementById("text-blur").value);
+    document.getElementById("percentage").style.setProperty("--text-blur", textBlur + "px");
+}
 
-let strokeColour = "red";
-
-ctx.strokeStyle = strokeColour;
+var percentage = 0;
 function loading()
 {
-    settings = getSettingsFromHTML();
     ctx.lineWidth = settings.lineWidth;
     ctx.shadowBlur = settings.lineBlur;
 
     percentage += settings.increment;
 
+    if (percentage >= 100) { percentage = 0; }
+
     for (let i = 0; i < settings.numberOfLines; i+=1)
     {
+        if (settings.missEveryXLines > 0 && (i+1) % settings.missEveryXLines === 0) continue;
         let radius = settings.innerCircleRadius + i * settings.lineSeparation;
         let shift = settings.spinDirection * i * (percentage / 100) * settings.spinRate;
         let startangle = shift * Math.PI * 2;
@@ -47,7 +75,6 @@ function loading()
         }
 
         let colour = getColourAtPercentage(percentage);
-
         document.getElementById("percentage").style.setProperty("--text-colour", `${colour}`);
 
         ctx.beginPath();
@@ -57,15 +84,7 @@ function loading()
         ctx.stroke();
     }
 
-    if (tick % framerate)
-    {
-        percentageEl.textContent = percentage.toFixed(0) + "%";
-    }
-
-    if (percentage >= 100)
-    {
-        percentage = 0;
-    }
+    if (tick % framerate) { percentageEl.textContent = percentage.toFixed(0) + "%"; }
 }
 
 let framerate = 60;
@@ -86,9 +105,8 @@ function restart()
     tick = 0;
     percentage = 0;
     percentageEl.textContent = 0 + "%";
-    loadingStep();
 }
-document.getElementById("restart").onclick = () => {restart()};
+document.getElementById("restart").onclick =  restart;
 
 function resetVariables()
 {
@@ -135,45 +153,6 @@ function resetVariables()
     </div>`; // don't judge me for this
 }
 document.getElementById("reset").onclick = () => {resetVariables()};
-
-var settings = 
-{
-    lineWidth: 3,
-    lineBlur: 10,
-    increment: 0.06,
-    innerCircleRadius: 100,
-    numberOfLines: 12,
-    lineSeparation: 25,
-    spinRate: 3,
-    spinDirection: 1,
-};
-function getSettingsFromHTML() 
-{
-    settings = 
-    {
-        lineWidth: parseFloat(document.getElementById("line-width").value),
-        lineBlur: parseFloat(document.getElementById("line-blur").value),
-        increment: parseFloat(document.getElementById("increment").value),
-        innerCircleRadius: parseFloat(document.getElementById("inner-circle-radius").value),
-        numberOfLines: parseInt(document.getElementById("number-of-lines").value),
-        lineSeparation: parseFloat(document.getElementById("line-separation").value),
-        spinRate: parseFloat(document.getElementById("spin-rate").value),
-        spinDirection: parseInt(document.getElementById("spin-direction").value),
-    };
-    return settings;
-}
-
-document.getElementById("text-size").oninput = () => 
-{
-    let textSize = parseFloat(document.getElementById("text-size").value);
-    document.getElementById("percentage").style.setProperty("--text-size", textSize + "px");
-};
-
-document.getElementById("text-blur").oninput = () =>
-{
-    let textBlur = parseFloat(document.getElementById("text-blur").value);
-    document.getElementById("percentage").style.setProperty("--text-blur", textBlur + "px");
-}
 
 function getColourAtPercentage(percentage) 
 {
@@ -234,25 +213,72 @@ function hexToRGB(hexColour)
 
 function interpolate(start, end, factor) { return start + (end - start) * factor; }
 
-document.getElementById("addStop").addEventListener("click", function() 
+function addGradientStop(color, position)
 {
     let stopDiv = document.createElement("div");
     stopDiv.classList.add("gradientStop");
     
     let stopColour = document.createElement("input");
     stopColour.type = "color";
-    stopColour.value = "#000000";
+    stopColour.value = color;
     stopColour.classList.add("stopColour");
     
     let stopPosition = document.createElement("input");
     stopPosition.type = "number";
     stopPosition.min = "0";
-    stopPosition.value = "50";
+    stopPosition.value = position;
     stopPosition.max = "100";
     stopPosition.classList.add("stopPosition");
     
     stopDiv.appendChild(stopColour);
     stopDiv.appendChild(stopPosition);
     
-    document.getElementById("gradientStops").appendChild(stopDiv);
-});
+    document.getElementById("stops").appendChild(stopDiv);
+}
+document.getElementById("addStop").addEventListener("click", function() { addGradientStop("#000000", 50); });
+
+
+function gradientPresetChange()
+{
+    preset = parseInt(document.getElementById("presets").value);
+    stops = document.getElementById("stops");
+    stops.innerHTML = "";
+    switch (preset)
+    {
+        case 0: // red-green-blue
+            addGradientStop("#ff0000", 0);
+            addGradientStop("#00ff00", 50);
+            addGradientStop("#0000ff", 100);
+            break;
+        case 1: // wedding day blues
+            addGradientStop("#40e0d0", 0);
+            addGradientStop("#ff8c00", 50);
+            addGradientStop("#ff0080", 100);
+            break;
+        case 2: // sunset
+            addGradientStop("#ffff00", 0);
+            addGradientStop("#ff8000", 50);
+            addGradientStop("#a80000", 100);
+            break;
+        case 3: // Ibiza sunset
+            addGradientStop("#ee0979", 0);
+            addGradientStop("#ff6a00", 100);
+            break;
+        case 4: // Tron:
+            addGradientStop("#21C4E7", 0);
+            addGradientStop("#21C4E7", 45);
+            addGradientStop("#fc741e", 50);
+            addGradientStop("#fc741e", 95);
+            addGradientStop("#21C4E7", 100);
+            break;
+        case 5: // Spectrum
+            addGradientStop("#ff0000", 0);
+            addGradientStop("#ff8000", 20);
+            addGradientStop("#ffff00", 40);
+            addGradientStop("#00ff00", 60);
+            addGradientStop("#0000ff", 80);
+            addGradientStop("#ff00ff", 100);
+            break;
+    }
+}
+document.getElementById("presets").addEventListener("input", (gradientPresetChange));

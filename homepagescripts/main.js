@@ -694,7 +694,7 @@ strangeCard.onclick = () => { window.open("https://seanstrain.github.io/attracto
 circleShooterCard.onclick = () => { window.open("https://seanstrain.github.io/games/circleshooter/circleshooter", "_blank"); };
 presentationsCard.onclick = () => { window.open("https://seanstrain.github.io/presentations/WhyICode/", "_blank"); };
 displaceCard.onclick = () => { window.open("https://github.com/SeanStrain/DisplacementSphere", "_blank"); };
-animationsCard.onclick = () => { window.open("https://seanstrain.github.io/animations/synchronisedcircles", "_blank"); };
+animationsCard.onclick = () => { window.open("https://seanstrain.github.io/animations/loading", "_blank"); };
 
 const seeMyWorkButton = document.getElementById("see-work-button");
 
