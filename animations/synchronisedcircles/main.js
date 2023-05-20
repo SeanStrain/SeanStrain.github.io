@@ -70,30 +70,22 @@ function loading()
 
 let framerate = 60;
 let tick = 0;
-let interval;
-const loadingStep = () => 
-{ 
-    if (isMobile())
-    {
-        settings.numberOfLines = 6;
-        settings.lineBlur = 0;
-    }
-    interval = setInterval(() =>
-    {
-        ctx.clearRect(0, 0, innerWidth, innerHeight);
-        loading();
-        tick++;
-    }, 1000 / framerate);
+
+function animate()
+{
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    loading();
+    tick++;
+    requestAnimationFrame(animate);
 }
 
-loadingStep();
+animate();
 
 
 function restart()
 {
     tick = 0;
     percentage = 0;
-    clearInterval(interval);
     percentageEl.textContent = 0 + "%";
     loadingStep();
 }
@@ -147,12 +139,12 @@ document.getElementById("reset").onclick = () => {resetVariables()};
 
 var settings = 
 {
-    lineWidth: 2,
-    lineBlur: 5,
+    lineWidth: 3,
+    lineBlur: 10,
     increment: 0.06,
     innerCircleRadius: 100,
     numberOfLines: 12,
-    lineSeparation: 15,
+    lineSeparation: 25,
     spinRate: 3,
     spinDirection: 1,
 };
