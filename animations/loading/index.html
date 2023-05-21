@@ -42,7 +42,7 @@
                     <div style="margin-bottom: 5px">Variables:</div>
                     <div class="menu-item">
                         <div>Speed of Rotation: &nbsp;<span><i>&nbsp;i&nbsp;</i><div id="spin-rate-explain" class="explain">
-                            How many rotations are performed by each arc per animation loop. Each arc will perform this many more rotations than the arc before it. The 1st arc always performs 0 rotations.
+                            How many rotations are performed by each line per animation loop. Each line will perform this many more rotations than the line before it. The innermost line always performs 0 rotations.
                         </div></span></div>
                         <input type="number" id="spin-rate" value="3" step="0.25"  class="variable">
                         <div>Increment of Animation: &nbsp;<span><i>&nbsp;i&nbsp;</i><div id="spin-rate-explain" class="explain">
@@ -60,15 +60,28 @@
                         <input type="number" id="text-blur" value="7" step="0.25"  class="variable">
                         <div>Inner Radius:</div>
                         <input type="number" id="inner-circle-radius" value="100" step="1"  class="variable">
-                        <div>Arc Separation:</div>
+                        <div>Line Separation:</div>
                         <input type="number" id="line-separation" value="25" step="1"  class="variable">
-                        <div>Miss Every X Arc: &nbsp;<span><i>&nbsp;i&nbsp;</i><div id="spin-rate-explain" class="explain">
-                            Skips every Xth arc, e.g., X = 2 will skip every second arc. n.b. X = 1 will skip every arc.</span></div></div>
+                        <div>Miss Every X Line: &nbsp;<span><i>&nbsp;i&nbsp;</i><div id="spin-rate-explain" class="explain">
+                            Skips every Xth line, e.g., X = 2 will skip every second line. n.b. X = 1 will skip every line.</span></div></div>
                         <input type="number" id="miss-every-x-lines" value="0" step="1"  class="variable">
+                        <div>Start Angle:</div>
+                        <input type="number" id="start-angle" value="0" step="1" min="0" max="360" class="variable">
+                        <div>Number of Sides:</div>
+                        <input type="number" id="number-of-sides" value="0" step="1" min="0" class="variable">
                         <div>Direction:</div>
                         <select id="spin-direction" class="menu-item"  class="variable">
-                            <option value="1">Clockwise</option>
+                            <option selected value="1">Clockwise</option>
                             <option value="-1">Anti-Clockwise</option>
+                            <option value="2">Alternating</option>
+                        </select>
+                        <div>Shape:</div>
+                        <select id="shape" class="menu-item"  class="variable" style="display:none">
+                            <option value="circle">Circle</option>
+                            <option value="triangle-full">Full Triangles</option>
+                            <option value="triangle-hybrid">Hybrid Triangles</option>
+                            <option selected value="triangle">Drawn Triangles</option>
+                            <option value="square">Square</option>
                         </select>
                     </div>
                 </div>
