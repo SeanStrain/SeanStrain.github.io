@@ -17,7 +17,9 @@
 */
 
 const canvasEl = document.getElementById('canvas');
-const ctx = canvasEl.getContext('2d');
+const gl = canvasEl.getContext('webgl');
+if (!gl) { alert('WebGL is not available on your browser'); }
+
 const percentageEl = document.getElementById('percentage');
 const epsilon = 0.0001;
 
@@ -25,16 +27,18 @@ const TAU = Math.PI * 2;
 const ETA = Math.PI / 2;
 
 var midScreen = {x: innerWidth/2, y: innerHeight/2};
+gl.viewport(0, 0, innerWidth, innerHeight);
 
 function resize()
 {
     canvasEl.width = innerWidth;
     canvasEl.height = innerHeight;
     midScreen = {x: innerWidth/2, y: innerHeight/2};
+    gl.viewport(0, 0, innerWidth, innerHeight);
 }
 resize();
 addEventListener("resize", (event) => { resize(); });
-
+  
 const defaultSettings =
 {
     lineWidth: 3,
@@ -99,21 +103,90 @@ document.getElementById("text-blur").oninput = () =>
     document.getElementById("percentage").style.setProperty("--text-blur", textBlur + "px");
 }
 
+function createShader(type, source) 
+{
+    let shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+    }
+    return shader;
+}
+
+let vertexShaderSource = `
+    attribute vec2 a_position;
+    uniform vec2 u_resolution;
+
+    void main() {
+       vec2 zeroToOne = a_position / u_resolution;
+       vec2 zeroToTwo = zeroToOne * 2.0;
+       vec2 clipSpace = zeroToTwo - 1.0;
+       gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+    }
+`;
+let vertexShader = createShader(gl.VERTEX_SHADER, vertexShaderSource);
+
+let fragmentShaderSource = `
+    precision mediump float;
+    uniform vec4 u_color;
+
+    void main() {
+    gl_FragColor = u_color;  
+    }
+`;
+let fragmentShader = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
+
+function createProgram(vertexShader, fragmentShader) 
+{
+    let program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
+        return null;
+    }
+    return program;
+}
+
+let program = createProgram(vertexShader, fragmentShader);
+gl.useProgram(program);
+
+let positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+
+let a_positionLocation = gl.getAttribLocation(program, "a_position");
+gl.enableVertexAttribArray(a_positionLocation);
+gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+function drawArc(centerX, centerY, radius, startAngle, endAngle, numSegments) 
+{
+    let angleStep = (endAngle - startAngle) / numSegments;
+    let positions = new Float32Array(2 * (numSegments + 1));
+    for (let i = 0; i <= numSegments; i++) 
+    {
+        let angle = startAngle + i * angleStep;
+        positions[2*i] = centerX + radius * Math.cos(angle);
+        positions[2*i+1] = centerY + radius * Math.sin(angle);
+    }
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    gl.drawArrays(gl.LINE_STRIP, 0, numSegments + 1);
+}
+
 var percentage = 0;
 function loading()
 {
-    ctx.lineWidth = settings.lineWidth;
-    ctx.shadowBlur = settings.lineBlur;
-
     percentage += settings.increment;
 
     if (percentage >= 100) { percentage = 0; }
 
-    // case _:
     let colour = getColourAtPercentage(percentage);
-    document.getElementById("percentage").style.setProperty("--text-colour", `${colour}`);
-    ctx.strokeStyle = colour;
-    ctx.shadowColor = colour;
+    let colourCSS = colour.css;
+    let colourWebGL = colour.webGL;
+    document.getElementById("percentage").style.setProperty("--text-colour", colourCSS);
 
     let direction = settings.spinDirection;
 
@@ -137,17 +210,18 @@ function loading()
                 endPoint = temp;
             }
 
-            ctx.beginPath();
-            ctx.arc(midScreen.x, midScreen.y, radius, startPoint, endPoint);
-            ctx.stroke();
-        } else {
-            let adjustedPercentage = (percentage * settings.spinRate * i) % 100;
-            drawLineOnShape(percentage, adjustedPercentage, radius, direction);
+            gl.uniform2f(gl.getUniformLocation(program, "u_resolution"), gl.canvas.width, gl.canvas.height);
+
+            gl.uniform4f(gl.getUniformLocation(program, "u_color"), colourWebGL[0], colourWebGL[1], colourWebGL[2], colourWebGL[3]);
+
+            const segmentLength = 1;  
+            let numSegments = Math.ceil(100 / segmentLength);
+            drawArc(midScreen.x, midScreen.y, radius, startPoint, endPoint, numSegments);
         }
     }
-
     if (tick % framerate) { percentageEl.textContent = percentage.toFixed(0) + "%"; }
 }
+
 
 function getPositionOnShape(percentage, radius)
 {
@@ -156,7 +230,7 @@ function getPositionOnShape(percentage, radius)
     let angles = [];
     for (let i = 0; i < settings.numberOfSides; i++) 
     {
-        angles.push(degreesToRadians(settings.startAngle) + angleSeparation * i);
+        angles.push(degreesToRadians(settings.startAngle) - ETA + angleSeparation * i);
     }
         
     let cornerPoints = [];
@@ -178,12 +252,12 @@ function getPositionOnShape(percentage, radius)
     };
 }
 
-function drawLineOnShape(percentage, adjustedPercentage, radius, direction)
+function drawLineOnShape(percentage, adjustedPercentage, radius)
 {
-    let sideLengthPercentage = Math.round((100 / settings.numberOfSides + Number.EPSILON) * 10000) / 10000;
+    let sideLengthPercentage = 100 / settings.numberOfSides;
 
-    let start = getPositionOnShape(adjustedPercentage, radius, sideLengthPercentage);
-    let end = getPositionOnShape((adjustedPercentage + percentage) % 100, radius, sideLengthPercentage);
+    let start = getPositionOnShape(adjustedPercentage, radius);
+    let end = getPositionOnShape((adjustedPercentage + percentage) % 100, radius);
 
     ctx.beginPath();
     ctx.moveTo(start.x, start.y); // begin at start
@@ -225,7 +299,7 @@ let framerate = 60;
 let tick = 0;
 function animate()
 {
-    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT);
     loading();
     tick++;
     requestAnimationFrame(animate);
@@ -311,7 +385,7 @@ function getColourAtPercentage(percentage)
         b: interpolate(lowerColour.b, upperColour.b, position)
     };
 
-    return colourToCSS(currentColour);
+    return { css: colourToCSS(currentColour), webGL: colourToWebGL(currentColour) };
 }
 
 function colourToCSS(colour) 
@@ -321,6 +395,17 @@ function colourToCSS(colour)
         return `rgba(${colour.r}, ${colour.g}, ${colour.b}, ${colour.a})`;
     }
     return `rgb(${colour.r}, ${colour.g}, ${colour.b})`;
+}
+
+function colourToWebGL(colour) 
+{
+    // Convert colour components from 0-255 range to 0-1 range
+    let r = colour.r / 255;
+    let g = colour.g / 255;
+    let b = colour.b / 255;
+    let a = colour.a !== undefined ? colour.a / 255 : 1;
+
+    return [r, g, b, a];
 }
 
 function hexToRGB(hexColour)
@@ -337,7 +422,6 @@ function hexToRGB(hexColour)
 
     return { r, g, b, a };
 }
-
 
 function addGradientStop(color, position)
 {
@@ -409,5 +493,6 @@ function gradientPresetChange()
 }
 document.getElementById("presets").addEventListener("input", (gradientPresetChange));
 
-function degreesToRadians(degrees) { return degrees * Math.PI / 180; }
 function interpolate(start, end, factor) { return start + (end - start) * factor; }
+function degreesToRadians(degrees) { return degrees * Math.PI / 180; }
+function euclideanDistance(x1, y1, x2, y2) { return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)); }
