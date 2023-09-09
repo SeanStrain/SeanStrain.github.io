@@ -318,7 +318,10 @@ var focalLength = 1000; // the focal length of the camera
 var info = undefined; // the information string that is displayed when the user selects an attractor
 function init()
 {
-    state = parseFloat(document.getElementById("attractor-state").value)
+    // state starts as a random number between 0 and the number of attractors possible
+    const numAttractors = $('#attractor-state').children().filter('option').length
+    state = Math.floor(Math.random() * numAttractors)
+    document.getElementById("attractor-state").value = state
 
     document.getElementById("menu-button").classList.add("visible")
     var spans = [document.getElementById("menu-1"), document.getElementById("menu-2"), document.getElementById("menu-3")]
