@@ -231,6 +231,7 @@ class Stroke
             context.stroke();
         }
     }
+    
     update()
     {
         this.draw();
@@ -318,11 +319,6 @@ var focalLength = 1000; // the focal length of the camera
 var info = undefined; // the information string that is displayed when the user selects an attractor
 function init()
 {
-    // state starts as a random number between 0 and the number of attractors possible
-    const numAttractors = $('#attractor-state').children().filter('option').length
-    state = Math.floor(Math.random() * numAttractors)
-    document.getElementById("attractor-state").value = state
-
     document.getElementById("menu-button").classList.add("visible")
     var spans = [document.getElementById("menu-1"), document.getElementById("menu-2"), document.getElementById("menu-3")]
 
@@ -337,6 +333,11 @@ function init()
 
     if (first_init)
     {
+        // state starts as a random number between 0 and the number of attractors possible
+        const numAttractors = $('#attractor-state').children().filter('option').length
+        state = Math.floor(Math.random() * numAttractors)
+        document.getElementById("attractor-state").value = state
+
         const menu1 = document.getElementById("menu-1");
         const height = parseInt(window.getComputedStyle(menu1).getPropertyValue('height'.split("px")[0]));
         spans.forEach((span, index) =>
