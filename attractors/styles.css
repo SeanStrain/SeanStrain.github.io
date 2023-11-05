@@ -223,6 +223,7 @@ select
     left: 10px;
     color:  var(--white);
     padding: 5px;
+    user-select: none;
 }
 
 /* axes */
