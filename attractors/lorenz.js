@@ -338,6 +338,8 @@ function init()
         state = Math.floor(Math.random() * numAttractors)
         document.getElementById("attractor-state").value = state
 
+        console.log(state)
+
         const menu1 = document.getElementById("menu-1");
         const height = parseInt(window.getComputedStyle(menu1).getPropertyValue('height'.split("px")[0]));
         spans.forEach((span, index) =>
