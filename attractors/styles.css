@@ -43,6 +43,12 @@
 {
     font-size: max(1vw,16px);
 }
+
+.hidden
+{
+    display: none;
+}
+
 /* end general css */
 
 
@@ -213,6 +219,20 @@ select
 {
     padding-bottom: 10px;
 }
+
+.gradientStop, #titles
+{
+    display: grid;
+    display: -ms-grid;
+    align-items: start;
+    align-content: start;
+    grid-auto-columns: 1fr;
+    grid-column-gap: 5px;
+    grid-row-gap: 5px;
+    -ms-grid-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+}
+
 /* end menu */
 
 #attractor-info

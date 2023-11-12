@@ -886,7 +886,9 @@
             <span id="menu-2"></span>
             <span id="menu-3"></span>
         </button> 
+        
         <div id="menu" class="menu small-text">
+
             <div class="menu-item-wrapper">
                 <div>Attractor Type:</div>
                 <select id="attractor-state" class="menu-item">
@@ -903,12 +905,42 @@
                     <!-- <option value="9">Three-Scroll-Unified</option> -->
                 </select>
             </div>
+
+            <div class="menu-item-wrapper">
+                <div class="menu-item">
+                    <div id="gradientStops">
+                        <div id="titles">
+                            <div>Colour:</div>
+                            <div>Percentage:</div>
+                        </div>
+                        <br>
+                        <div id="stops">
+                        </div>
+                    </div>
+                    <button id="addStop">Add Stop</button>
+                    <div>Presets:</div>
+                    <select id="presets" class="menu-item">
+                        <option value="0">Red-Green-Blue</option>
+                        <option value="1">"Wedding Cake"</option>
+                        <option value="2">"Sunset"</option>
+                        <option value="3">"Pink Sunset"</option>
+                        <option value="4">"Tron"</option>
+                        <option selected value="5">"Spectrum"</option>
+                    </select>
+                </div> 
+            </div>
+
             <div id="misc-wrapper" class="menu-item-wrapper">
                 <div class="menu-item">
                     <button type="button" id="restart">Restart
                     </button>
                     <br>
                     <br>
+                    <div>Play Music:</div>
+                    <select id="play-music">
+                        <option value="false">No</option>
+                        <option selected value="true">Yes</option>
+                    </select>
                     <div>Show UI (press esc to unhide):</div>
                     <select id="show-ui">
                         <option value="false">No</option>

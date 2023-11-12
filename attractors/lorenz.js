@@ -178,6 +178,8 @@ class Canvas
 var canvasColour = `rbga(${10}, ${10}, ${12}, 0.005)`;
 var canvas  = new Canvas(canvasEl, context, canvasColour, '0');
 
+const sizeWeighting = 2;
+
 var colour = function() {}
 class Stroke
 {
@@ -191,9 +193,11 @@ class Stroke
         this.life = 70;
         this.minAlpha = this.alpha / this.life;
 
-        const hue = Math.abs(this.begin_point.x * 40 + total_ticks);
-        const sat = Math.abs(this.begin_point.y * 40 + total_ticks);
-        this.colour = currentAttractor.colour(hue, sat, this.z);
+        const miniTick = total_ticks / 10;
+        const percentage = (this.begin_point.x + this.begin_point.y + miniTick) % 200;
+        this.colour = getColourAtPercentage(percentage);
+
+        this.size = 0;
 
         this.new = true;
     }
@@ -204,6 +208,8 @@ class Stroke
 
         this.alpha -= this.minAlpha;
         context.globalAlpha = this.alpha;
+
+        this.life -= 1;
     
         let begin_rotated = rotateX(this.begin_point, rotationX);
         begin_rotated = rotateY(begin_rotated, rotationY);
@@ -220,13 +226,15 @@ class Stroke
         const end_y = (end_rotated.y * focalLength) / (end_rotated.z + focalLength) * currentAttractor.size_modifier_y + midy;
     
         let { offsetX, offsetY } = getTranslation(innerWidth, innerHeight, scale);
+
+        this.size = (((begin_x * scale + offsetX)  - (end_x * scale + offsetX)) + ((begin_y * scale + offsetY) - (end_y * scale + offsetY))) * 2;
     
         if (show_strokes)
         {
             context.beginPath();
             context.moveTo(begin_x * scale + offsetX, begin_y * scale + offsetY);
             context.lineTo(end_x * scale + offsetX, end_y * scale + offsetY);
-        
+
             context.strokeStyle = this.colour;
             context.stroke();
         }
@@ -266,8 +274,10 @@ class Particle
         let begin_point = { x: old_x, y: old_y, z: old_z };
         let end_point = { x: this.x, y: this.y, z: this.z };
 
-        var stroke = new Stroke(begin_point, end_point, this.z, 1)
-        if (drawing) strokes.push(stroke)
+        if (drawing) {
+            const stroke = new Stroke(begin_point, end_point, this.z, 1)
+            strokes.push(stroke)
+        }
       
         begin_point = rotateX(begin_point, rotationX);
         begin_point = rotateY(begin_point, rotationY);
@@ -304,6 +314,12 @@ class Particle
               );
             context.fill()
         }
+    }
+
+    outOfBounds() {
+        return this.x > 10000 || this.x < -10000 
+            || this.y > 10000 || this.y < -10000 
+            || this.z > 10000 || this.z < -10000;
     }
 }
 
@@ -428,6 +444,7 @@ function init()
     currentAttractor.resize_modifier()
     currentAttractor.generation()
 
+    gradientPresetChange()
 
     canvas.initialise()
     if (first_init) 
@@ -456,8 +473,10 @@ function animate()
     animationId = requestAnimationFrame(animate)
     canvas.update()
 
+    let magnitude = 0;
     strokes.forEach((stroke, index) =>
     {
+        magnitude += Math.abs(stroke.size);
         if (stroke.alpha < stroke.minAlpha)
         {
             strokes.splice(index, 1)
@@ -471,11 +490,13 @@ function animate()
         }
     })
 
+    if (playMusic && audioContext && total_ticks % 5 === 0) {
+        generateMusic(magnitude / Math.max(strokes.length, 1) / sizeWeighting);
+    }
+
     particles.forEach((particle,index) =>
     {
-        if (particle.x > 10000 || particle.x < -10000 || 
-            particle.y > 10000 || particle.y < -10000 || 
-            particle.z > 10000 || particle.z < -10000)
+        if (particle.outOfBounds())
         {
             particles.splice(index, 1)
         }
@@ -533,8 +554,47 @@ addEventListener("click", (event) =>
 
 })
 
+// Initialize Web Audio API
+var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+// Function to generate music based on magnitude
+function generateMusic(magnitude) {
+    magnitude = Math.abs(magnitude);
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+
+    // Scale the magnitude to a reasonable frequency range
+    const frequency = Math.min(Math.floor(200 + magnitude * 15), 1000);
+    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+    // Use magnitude to control the volume (gain)
+    const volume = Math.min(magnitude / 200, 0.1);
+
+    // Use a low-pass filter for a smoother sound
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(1000, audioContext.currentTime);
+
+    // Connect the nodes
+    oscillator.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Apply an envelope to control volume
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.1);
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 1.5);
+
+    oscillator.type = 'triangle';
+
+    // Start and stop the oscillator
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 1.5);
+}
+
 function clearup()
 {
+    audioContext = undefined;
     gsap.to(info_wrapper, {opacity: 0, duration: 1})
     setTimeout(() => { info.style.opacity = "0" }, 1005)
     particles = []
@@ -544,7 +604,7 @@ function clearup()
 var attractor_state = document.getElementById('attractor-state')
 attractor_state.addEventListener("change", function() 
 {
-
+    drawing = false;
     state = parseInt(attractor_state.value)
     clearup()
     generating = false
@@ -552,12 +612,20 @@ attractor_state.addEventListener("change", function()
     {
         strokes = []
         particles = []
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
         init()
     }, 2000)
 })
 
 
 // toggle UI elements
+var playMusic = true;
+const playMusicEL = document.getElementById('play-music');
+playMusicEL.addEventListener("change", function()
+{
+    playMusic = !playMusic
+});
+
 var show_ui = true;
 const show_ui_el = document.getElementById('show-ui');
 show_ui_el.addEventListener("change", showUI)
@@ -668,6 +736,7 @@ restart.addEventListener("click", function() // restart the attractor
     {
         strokes = []
         particles = []
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
         init()
     }, 2000)
 });
@@ -938,7 +1007,7 @@ class LorenzAttractor extends Attractor
 
     attractor(x, y, z) 
     {
-        let framerate = super.getSpeedModifier() / 2 * 0.017;
+        let framerate = super.getSpeedModifier() / 4 * 0.017;
     
         let axis = { "x": x, "y": y, "z": z }
         let temp = {}
@@ -998,7 +1067,7 @@ class Lorenz84Attractor extends Attractor
 
     attractor(x, y, z) 
     {
-        let framerate = super.getSpeedModifier() / 6 * 0.017;
+        let framerate = super.getSpeedModifier() / 10 * 0.017;
     
         let axis = { "x": x, "y": y, "z": z }
         let temp = {}
@@ -1213,7 +1282,7 @@ class DadrasAttractor extends Attractor
 
     attractor(x, y, z)
     {
-        let framerate = super.getSpeedModifier() * 0.017;
+        let framerate = super.getSpeedModifier() / 3 * 0.017;
     
         let axis = { "x": x, "y": y, "z": z }
         let temp = {}
@@ -1503,7 +1572,7 @@ class RabinovichFabrikantAttractor extends Attractor
 
     attractor(x, y, z)
     {
-        let framerate = super.getSpeedModifier() * 0.017;
+        let framerate = super.getSpeedModifier() / 2 * 0.017;
 
         let axis = { "x": x, "y": y, "z": z }
         let temp = {}
@@ -1841,3 +1910,144 @@ class CliffordAttractor extends Attractor
         return axis;
     }
 }
+/********************************************************/
+/* COLOURS */
+/********************************************************/
+function interpolate(start, end, factor) { return start + (end - start) * factor; }
+
+/********************************************************/
+/* getColourAtPercentage() => RGB Colour String.
+/* Given a percentage, calculates the colour at that point.
+/* Technically goes up to 200, as the gradient is mirrored.
+/********************************************************/
+function getColourAtPercentage(percentage) {
+    // Adjust percentage for the mirrored range (100-200)
+    if (percentage > 100) {
+        percentage = 200 - percentage;
+    }
+
+    let stopDivs = document.querySelectorAll(".gradientStop");
+    let stops = [];
+    for (let div of stopDivs) {
+        let colour = div.querySelector(".stopColour").value;
+        let position = div.querySelector(".stopPosition").value;
+        stops.push({ colour: colour, stop: position });
+    }
+    stops.sort((a, b) => a.stop - b.stop);
+
+    let lowerStop = stops[0];
+    let upperStop;
+    for (let i = 1; i < stops.length; i++) {
+        upperStop = stops[i];
+        if (upperStop.stop >= percentage) {
+            break;
+        }
+        lowerStop = upperStop;
+    }
+
+    let range = upperStop.stop - lowerStop.stop;
+    let position = (percentage - lowerStop.stop) / range;
+
+    let lowerColour = hexToRGB(lowerStop.colour);
+    let upperColour = hexToRGB(upperStop.colour);
+    let currentColour = {
+        r: interpolate(lowerColour.r, upperColour.r, position),
+        g: interpolate(lowerColour.g, upperColour.g, position),
+        b: interpolate(lowerColour.b, upperColour.b, position),
+    };
+
+    return colourToCSS(currentColour);
+}
+
+function colourToCSS(colour) 
+{
+    if (colour.a !== undefined) 
+    {
+        return `rgba(${colour.r}, ${colour.g}, ${colour.b}, ${colour.a})`;
+    }
+    return `rgb(${colour.r}, ${colour.g}, ${colour.b})`;
+}
+
+function hexToRGB(hexColour)
+{
+    let r = parseInt(hexColour.substring(1, 3), 16);
+    let g = parseInt(hexColour.substring(3, 5), 16);
+    let b = parseInt(hexColour.substring(5, 7), 16);
+    let a = 1;
+
+    if (hexColour.length > 7)
+    {
+        a = parseInt(hexColour.substring(7, 9), 16);
+    }
+
+    return { r, g, b, a };
+}
+
+function addGradientStop(color, position)
+{
+    let stopDiv = document.createElement("div");
+    stopDiv.classList.add("gradientStop");
+    
+    let stopColour = document.createElement("input");
+    stopColour.type = "color";
+    stopColour.value = color;
+    stopColour.classList.add("stopColour");
+    
+    let stopPosition = document.createElement("input");
+    stopPosition.type = "number";
+    stopPosition.min = "0";
+    stopPosition.value = position;
+    stopPosition.max = "100";
+    stopPosition.classList.add("stopPosition");
+    
+    stopDiv.appendChild(stopColour);
+    stopDiv.appendChild(stopPosition);
+    
+    document.getElementById("stops").appendChild(stopDiv);
+}
+document.getElementById("addStop").addEventListener("click", function() { addGradientStop("#000000", 50); });
+
+function gradientPresetChange()
+{
+    preset = parseInt(document.getElementById("presets").value);
+    stops = document.getElementById("stops");
+    stops.innerHTML = "";
+    switch (preset)
+    {
+        case 0: // red-green-blue
+            addGradientStop("#ff0000", 0);
+            addGradientStop("#00ff00", 50);
+            addGradientStop("#0000ff", 100);
+            break;
+        case 1: // Wedding cake
+            addGradientStop("#40e0d0", 0);
+            addGradientStop("#ff8c00", 50);
+            addGradientStop("#ff0080", 100);
+            break;
+        case 2: // Sunset
+            addGradientStop("#ffff00", 0);
+            addGradientStop("#ff8000", 50);
+            addGradientStop("#a80000", 100);
+            break;
+        case 3: // Spanish sunset
+            addGradientStop("#ee0979", 0);
+            addGradientStop("#ff6a00", 100);
+            break;
+        case 4: // Tron:
+            addGradientStop("#21C4E7", 0);
+            addGradientStop("#21C4E7", 45);
+            addGradientStop("#fc741e", 50);
+            addGradientStop("#fc741e", 95);
+            addGradientStop("#21C4E7", 100);
+            break;
+        case 5: // Spectrum
+            addGradientStop("#ff0000", 0);
+            addGradientStop("#ff8000", 20);
+            addGradientStop("#ffff00", 40);
+            addGradientStop("#00ff00", 60);
+            addGradientStop("#0000ff", 80);
+            addGradientStop("#ff00ff", 100);
+            break;
+    }
+}
+document.getElementById("presets").addEventListener("input", (gradientPresetChange));
