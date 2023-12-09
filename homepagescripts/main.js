@@ -29,6 +29,7 @@ function init()
             body.classList.add("loaded");
             cards.classList.add("loaded");
             about.classList.add("loaded");
+            work.classList.add("loaded");
             header.classList.add("loaded");
             setTimeout(() => 
             {
@@ -600,6 +601,8 @@ function updateScrollBar(inputScale)
 // scroll animations:
 const about = document.getElementById("about");
 const aboutTitle = document.getElementById("about-title");
+const work = document.getElementById("work");
+const workTitle = document.getElementById("work-title");
 const cover = document.getElementById("cover");
 const observer = new IntersectionObserver((observation) => 
 {
@@ -630,8 +633,14 @@ const observer = new IntersectionObserver((observation) =>
                     workButton.classList.remove("nav-on");
                     break;
                 case "work-page":
+                    gsap.to(workTitle,
+                        {
+                            opacity: 1,
+                            duration: 1,
+                        });
                     aboutButton.classList.remove("nav-on");
                     homeButton.classList.remove("nav-on");
+                    if (!$.browser.mozilla) work.classList.add("work-scrolled-to");
                     workButton.classList.add("nav-on");
                     break;
             }
@@ -647,6 +656,7 @@ const observer = new IntersectionObserver((observation) =>
                     cover.classList.remove("scrolled-to");
                     break;
                 case "work-page":
+                    work.classList.remove("work-scrolled-to");
                     break;
             }
         }
