@@ -619,7 +619,7 @@ const observer = new IntersectionObserver((observation) =>
                     tiles.classList.add("tiles-scrolled-past");
                     if (!$.browser.mozilla) about.classList.add("about-scrolled-to");
                     cover.classList.add("scrolled-to");
-                    morphAnimate();
+                    // morphAnimate();
                     gsap.to(aboutTitle,
                     {
                         opacity: 1,

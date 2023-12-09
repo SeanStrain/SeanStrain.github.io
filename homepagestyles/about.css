@@ -92,7 +92,7 @@
     user-select: none;
 }
 
-#morph-text1,
+/* #morph-text1,
 #morph-text2
 {
     position: absolute;
@@ -103,7 +103,7 @@
     background-clip: text;
 	-moz-background-clip: text;
 	-webkit-background-clip: text;
-}
+} */
 
 #about-scroll-flag
 {
