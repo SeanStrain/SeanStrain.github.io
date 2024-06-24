@@ -31,17 +31,17 @@
 /* general css*/
 .big-text
 {
-    font-size: max(5vw,32px);
+    font-size: min(max(5vw,32px), 52px);
 }
 
 .medium-text
 {
-    font-size: max(4vw,24px);
+    font-size: min(max(4vw,24px), 36px);
 }
 
 .small-text
 {
-    font-size: max(1vw,16px);
+    font-size: min(max(1vw,16px), 22px);
 }
 
 .hidden
