@@ -619,7 +619,7 @@ attractor_state.addEventListener("change", function()
 
 
 // toggle UI elements
-var playMusic = true;
+var playMusic = false;
 const playMusicEL = document.getElementById('play-music');
 playMusicEL.addEventListener("change", function()
 {
