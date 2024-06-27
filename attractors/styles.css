@@ -207,6 +207,9 @@ select
 .menu.open 
 {
     display: block;
+    max-height: 80vh;
+    overflow: overlay;
+    scroll-behavior: auto;
 }
 
 .menu > * select, .menu > * input, .menu > * button
