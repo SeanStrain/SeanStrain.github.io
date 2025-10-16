@@ -17,8 +17,10 @@
 */
 
 const canvasEl = document.getElementById('canvas');
-const gl = canvasEl.getContext('webgl');
-if (!gl) { alert('WebGL is not available on your browser'); }
+var tempGL = canvasEl.getContext('webgl');
+if (!tempGL) { tempGL = canvasEl.getContext('experimental-webgl'); }
+if (!tempGL) { alert('WebGL is not available on your browser'); }
+const gl = tempGL;
 
 const percentageEl = document.getElementById('percentage');
 const epsilon = 0.0001;
@@ -26,19 +28,6 @@ const epsilon = 0.0001;
 const TAU = Math.PI * 2;
 const ETA = Math.PI / 2;
 
-var midScreen = {x: innerWidth/2, y: innerHeight/2};
-gl.viewport(0, 0, innerWidth, innerHeight);
-
-function resize()
-{
-    canvasEl.width = innerWidth;
-    canvasEl.height = innerHeight;
-    midScreen = {x: innerWidth/2, y: innerHeight/2};
-    gl.viewport(0, 0, innerWidth, innerHeight);
-}
-resize();
-addEventListener("resize", (event) => { resize(); });
-  
 const defaultSettings =
 {
     lineWidth: 3,
@@ -108,7 +97,8 @@ function createShader(type, source)
     let shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) 
+    {
         alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
@@ -116,11 +106,26 @@ function createShader(type, source)
     return shader;
 }
 
+function createProgram(vertexShader, fragmentShader) 
+{
+    let program = gl.createProgram();
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) 
+    {
+        alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
+        return null;
+    }
+    return program;
+}
+
 let vertexShaderSource = `
     attribute vec2 a_position;
     uniform vec2 u_resolution;
 
-    void main() {
+    void main() 
+    {
        vec2 zeroToOne = a_position / u_resolution;
        vec2 zeroToTwo = zeroToOne * 2.0;
        vec2 clipSpace = zeroToTwo - 1.0;
@@ -133,24 +138,12 @@ let fragmentShaderSource = `
     precision mediump float;
     uniform vec4 u_color;
 
-    void main() {
-    gl_FragColor = u_color;  
+    void main() 
+    {
+        gl_FragColor = u_color;  
     }
 `;
 let fragmentShader = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
-
-function createProgram(vertexShader, fragmentShader) 
-{
-    let program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
-        return null;
-    }
-    return program;
-}
 
 let program = createProgram(vertexShader, fragmentShader);
 gl.useProgram(program);
@@ -161,6 +154,20 @@ gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 let a_positionLocation = gl.getAttribLocation(program, "a_position");
 gl.enableVertexAttribArray(a_positionLocation);
 gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+var midScreen = {x: innerWidth/2, y: innerHeight/2};
+gl.viewport(0, 0, innerWidth, innerHeight);
+
+function resize()
+{
+    canvasEl.width = innerWidth;
+    canvasEl.height = innerHeight;
+    midScreen = {x: innerWidth/2, y: innerHeight/2};
+    gl.viewport(0, 0, innerWidth, innerHeight);
+    gl.uniform2f(gl.getUniformLocation(program, "u_resolution"), innerWidth, innerHeight);
+}
+resize();
+addEventListener("resize", (event) => { resize(); });
 
 function drawArc(centerX, centerY, radius, startAngle, endAngle, numSegments) 
 {
@@ -190,7 +197,7 @@ function loading()
 
     let direction = settings.spinDirection;
 
-    for (let i = 0; i < settings.numberOfLines; i+=1)
+    for (let i = 0; i < settings.numberOfLines; i++)
     {
         if (settings.spinDirection === 2) { direction = i % 2 === 0 ? 1 : -1; }
         if (settings.missEveryXLines > 0 && (i+1) % settings.missEveryXLines === 0) continue;
@@ -210,8 +217,6 @@ function loading()
                 endPoint = temp;
             }
 
-            gl.uniform2f(gl.getUniformLocation(program, "u_resolution"), gl.canvas.width, gl.canvas.height);
-
             gl.uniform4f(gl.getUniformLocation(program, "u_color"), colourWebGL[0], colourWebGL[1], colourWebGL[2], colourWebGL[3]);
 
             const segmentLength = 1;  
@@ -221,7 +226,6 @@ function loading()
     }
     if (tick % framerate) { percentageEl.textContent = percentage.toFixed(0) + "%"; }
 }
-
 
 function getPositionOnShape(percentage, radius)
 {
@@ -304,7 +308,7 @@ function animate()
     tick++;
     requestAnimationFrame(animate);
 }
-animate();
+requestAnimationFrame(animate);
 
 
 function restart()

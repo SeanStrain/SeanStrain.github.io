@@ -185,32 +185,38 @@ function drawLineOnShape(percentage, adjustedPercentage, radius, direction)
     let start = getPositionOnShape(adjustedPercentage, radius, sideLengthPercentage);
     let end = getPositionOnShape((adjustedPercentage + percentage) % 100, radius, sideLengthPercentage);
 
-    ctx.beginPath();
-    ctx.moveTo(start.x, start.y); // begin at start
-    if (end.side === start.side && percentage < sideLengthPercentage) // if on the same side
+    switch (direction)
     {
-        ctx.lineTo(end.x, end.y); // basic line drawing
-    } else {
-        let endPoint = getPositionOnShape(start.side * sideLengthPercentage, radius); // end of the side
-        ctx.lineTo(endPoint.x, endPoint.y);
-        ctx.stroke(); // draw to end of first side
+        case 1:
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y); // begin at start
+            if (end.side === start.side && percentage < sideLengthPercentage) // if on the same side
+            {
+                ctx.lineTo(end.x, end.y); // basic line drawing
+            } else {
+                let endPoint = getPositionOnShape(start.side * sideLengthPercentage, radius); // end of the side
+                ctx.lineTo(endPoint.x, endPoint.y);
+                ctx.stroke(); // draw to end of first side
 
-        let percentageDistance = sideLengthPercentage * (start.side) - adjustedPercentage; // distance from start to end of first side
-        let remainingPercentage = percentage - percentageDistance; // remaining percentage to draw
-        let loops = 0;
-        while (remainingPercentage >= sideLengthPercentage) 
-        {
-            loops++;
-            let nextStartPoint = endPoint;
-            endPoint = getPositionOnShape(((start.side + loops) % settings.numberOfSides) * sideLengthPercentage, radius); // end of the side
-            drawLine(nextStartPoint, endPoint);
-            remainingPercentage -= sideLengthPercentage;
-        }
-        ctx.beginPath();
-        ctx.moveTo(endPoint.x, endPoint.y);
-        ctx.lineTo(end.x, end.y);
+                let percentageDistance = sideLengthPercentage * (start.side) - adjustedPercentage; // distance from start to end of first side
+                let remainingPercentage = percentage - percentageDistance; // remaining percentage to draw
+                let loops = 0;
+                while (remainingPercentage >= sideLengthPercentage) 
+                {
+                    loops++;
+                    let nextStartPoint = endPoint;
+                    endPoint = getPositionOnShape(((start.side + loops) % settings.numberOfSides) * sideLengthPercentage, radius); // end of the side
+                    drawLine(nextStartPoint, endPoint);
+                    remainingPercentage -= sideLengthPercentage;
+                }
+                ctx.beginPath();
+                ctx.moveTo(endPoint.x, endPoint.y);
+                ctx.lineTo(end.x, end.y);
+            }
+            ctx.stroke();
+
+            break;
     }
-    ctx.stroke();
 }
 
 function drawLine(start, end)
