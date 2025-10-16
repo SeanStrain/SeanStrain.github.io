@@ -154,53 +154,6 @@ function getMouseX() { return x; }
 
 function getMouseY() { return y; }
 
-let mayHover = true;
-function hover()
-{
-    return;
-    setInterval(() =>
-    {
-        if (!mayHover) { return; }
-        const elements = document.elementsFromPoint(getMouseX(), getMouseY());
-        const cards = document.getElementById("cards");
-        if (elements.includes(cards))
-        {
-            return;
-        }
-        var justPushed = [];
-        elements.forEach(tile =>
-        {
-            if (tile.classList.contains("tile"))
-            {
-                hoveredTiles.push(tile);
-                justPushed.push(tile);
-                tile.classList.add("tile-hover");
-            }
-        });
-        hoveredTiles.forEach((tile, index) =>
-        {
-            if (true)
-            {
-                setTimeout(() =>
-                {
-                    tile.classList.remove("tile-hover");
-                    toSplice.push(index);
-                }, 99);
-            }
-        });
-        toSplice.forEach(index =>
-        {
-            hoveredTiles.splice(index, 1);
-        });
-        setTimeout(() =>
-        {
-            toSplice = [];
-            justPushed = [];
-        }, 100);
-    }, 0.1);
-}
-setTimeout(() => {hover()}, 10);
-
 // initialise the lines
 const lines = [...document.getElementsByClassName("title-border-line")];
 const corners = [...document.getElementsByClassName("title-border-corner")];
@@ -597,7 +550,6 @@ const observer = new IntersectionObserver((observation) =>
                     workButton.classList.remove("nav-on");
                     break;
                 case "about":
-                    mayHover = false;
                     tiles.classList.add("tiles-scrolled-past");
                     about.classList.add("about-scrolled-to");
                     cover.classList.add("scrolled-to");
@@ -629,7 +581,6 @@ const observer = new IntersectionObserver((observation) =>
                 case "home-page":
                     break;
                 case "about":
-                    mayHover = true;
                     tiles.classList.remove("tiles-scrolled-past");
                     about.classList.remove("about-scrolled-to");
                     cover.classList.remove("scrolled-to");
