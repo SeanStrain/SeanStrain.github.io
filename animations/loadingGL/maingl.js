@@ -17,8 +17,13 @@
 */
 
 const canvasEl = document.getElementById('canvas');
-const gl = canvasEl.getContext('webgl');
-if (!gl) { alert('WebGL is not available on your browser'); }
+var tempGL = canvasEl.getContext('webgl');
+if (!tempGL) { tempGL = canvasEl.getContext('experimental-webgl'); }
+if (!tempGL) { alert('WebGL is not available on your browser'); }
+const gl = tempGL;
+gl.disable(gl.DEPTH_TEST)
+gl.disable(gl.CULL_FACE)
+gl.enable(gl.BLEND)
 
 const percentageEl = document.getElementById('percentage');
 const epsilon = 0.0001;
@@ -26,28 +31,8 @@ const epsilon = 0.0001;
 const TAU = Math.PI * 2;
 const ETA = Math.PI / 2;
 
-var midScreen = {x: innerWidth/2, y: innerHeight/2};
-gl.viewport(0, 0, innerWidth, innerHeight);
+const fourByFourIdentity = createIdentity(4);
 
-function resize()
-{
-    canvasEl.width = innerWidth;
-    canvasEl.height = innerHeight;
-    midScreen = {x: innerWidth/2, y: innerHeight/2};
-    gl.viewport(0, 0, innerWidth, innerHeight);
-}
-resize();
-addEventListener("resize", (event) => { resize(); });
-
-let debug = false;
-document.addEventListener("keydown", (event) =>
-{
-    if (event.key === "`")
-    {
-        debug = !debug
-    }
-});
-  
 const defaultSettings =
 {
     lineWidth: 3,
@@ -117,7 +102,8 @@ function createShader(type, source)
     let shader = gl.createShader(type);
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) 
+    {
         alert('An error occurred compiling the shaders: ' + gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
@@ -131,7 +117,8 @@ function createProgram(vertexShader, fragmentShader)
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) 
+    {
         alert('Unable to initialize the shader program: ' + gl.getProgramInfoLog(program));
         return null;
     }
@@ -140,13 +127,21 @@ function createProgram(vertexShader, fragmentShader)
 
 let vertexShaderSource = `
     attribute vec2 a_position;
-    uniform vec2 u_resolution;
+    attribute vec2 a_normal;
+    attribute float a_miter; 
+
+    uniform mat4 u_projection;
+    uniform mat4 u_model;
+    uniform mat4 u_view;
+    uniform float u_thickness;
+    
+    varying float edge;
 
     void main() {
-       vec2 zeroToOne = a_position / u_resolution;
-       vec2 zeroToTwo = zeroToOne * 2.0;
-       vec2 clipSpace = zeroToTwo - 1.0;
-       gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
+        edge = sign(a_miter);
+        vec2 pointPos = a_position.xy + vec2(a_normal * u_thickness/2.0 * a_miter);
+        gl_Position = u_projection * u_view * u_model * vec4(pointPos, 0.0, 1.0);
+        gl_PointSize = 1.0;
     }
 `;
 let vertexShader = createShader(gl.VERTEX_SHADER, vertexShaderSource);
@@ -155,90 +150,259 @@ let fragmentShaderSource = `
     precision mediump float;
     uniform vec4 u_color;
 
+    varying float edge;
+        
     void main() {
-    gl_FragColor = u_color;  
+      float v = 1.0 - abs(edge);
+      v = smoothstep(0.65, 0.7, v*0.0); 
+      gl_FragColor = mix(u_color, vec4(0.0), v);
     }
 `;
 let fragmentShader = createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
 
-let blurVertexShaderSource = `
-    attribute vec2 a_position;
-
-    void main() {
-        gl_Position = vec4(a_position, 0, 1);
-    }
-`;
-
-let blurFragmentShaderSource = `
-    precision mediump float;
-
-    uniform sampler2D u_image;
-    uniform vec2 u_texSize;
-
-    void main() {
-        vec2 onePixel = vec2(1.0, 1.0) / u_texSize;
-        
-        vec4 colorSum =
-            texture2D(u_image, gl_FragCoord.xy * onePixel) * 0.3846153846 + 
-            texture2D(u_image, (gl_FragCoord.xy + vec2(onePixel.x, 0.0)) * onePixel) * 0.0769230769 + 
-            texture2D(u_image, (gl_FragCoord.xy - vec2(onePixel.x, 0.0)) * onePixel) * 0.0769230769 +
-            texture2D(u_image, (gl_FragCoord.xy + vec2(0.0, onePixel.y)) * onePixel) * 0.0769230769 +
-            texture2D(u_image, (gl_FragCoord.xy - vec2(0.0, onePixel.y)) * onePixel) * 0.0769230769;
-
-        gl_FragColor = vec4(colorSum.rgb, 1.0);
-    }
-`;
-let blurVertexShader = createShader(gl.VERTEX_SHADER, blurVertexShaderSource);
-let blurFragmentShader = createShader(gl.FRAGMENT_SHADER, blurFragmentShaderSource);
-let blurProgram = createProgram(blurVertexShader, blurFragmentShader);
-
-let framebuffer1 = gl.createFramebuffer();
-let framebuffer2 = gl.createFramebuffer();
-
-let texture1 = gl.createTexture();
-let texture2 = gl.createTexture();
-
-gl.bindTexture(gl.TEXTURE_2D, texture1);
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.width, gl.canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer1);
-gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture1, 0);
-
-gl.bindTexture(gl.TEXTURE_2D, texture2);
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.canvas.width, gl.canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer2);
-gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture2, 0);
-
-
 let program = createProgram(vertexShader, fragmentShader);
 gl.useProgram(program);
-
-let lineOffsetBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, lineOffsetBuffer);
 
 let positionBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
 let a_positionLocation = gl.getAttribLocation(program, "a_position");
-let a_lineOffsetLocation = gl.getAttribLocation(program, "a_lineOffset");
+gl.enableVertexAttribArray(a_positionLocation);
+gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
+
+let u_projectionLocation = gl.getUniformLocation(program, "u_projection");
+let projectionMatrix = [
+    2.0 / gl.canvas.width, 0, 0, 0,
+    0, -2.0 / gl.canvas.height, 0, 0,
+    0, 0, 1, 1,
+    -1, 1, 0, 0,
+];
+//gl.uniformMatrix4fv(u_projectionLocation, false, projectionMatrix);
+  
+gl.uniformMatrix4fv(u_projectionLocation, false, new Float32Array([2/innerWidth, 0, 0, 0, 0, 2/innerHeight, 0, 0, 0, 0, 1, 0, -1, -1, 0, 1]));
+// gl.uniformMatrix4fv(u_projectionLocation, false, createIdentity(4));
+
+let u_modelLocation = gl.getUniformLocation(program, "u_model");
+gl.uniformMatrix4fv(u_modelLocation, false, createIdentity(4));
+
+let u_viewLocation = gl.getUniformLocation(program, "u_view");
+gl.uniformMatrix4fv(u_viewLocation, false, createIdentity(4));
+
+var midScreen = {x: innerWidth/2, y: innerHeight/2};
+function resize()
+{
+    canvasEl.width = innerWidth;
+    canvasEl.height = innerHeight;
+    midScreen = {x: innerWidth/2, y: innerHeight/2};
+    gl.viewport(0, 0, innerWidth, innerHeight);
+    gl.uniform2f(gl.getUniformLocation(program, "u_resolution"), innerWidth, innerHeight);
+}
+resize();
+addEventListener("resize", (event) => { resize(); });
+
+function calculatePackedNormalsAndMiters(positions) 
+{
+    let count = positions.length / 2; // number of vertices
+    let normals = new Float32Array(count * 2);
+    let miters = new Float32Array(count);
+
+    for (let i = 0; i < count; i++) {
+        let prev = (i - 1 + count) % count; // previous vertex index
+        let next = (i + 1) % count; // next vertex index
+
+        // Calculate the vectors representing the previous and next edges
+        let prevEdge = [
+            positions[2 * i] - positions[2 * prev],
+            positions[2 * i + 1] - positions[2 * prev + 1]
+        ];
+        let nextEdge = [
+            positions[2 * next] - positions[2 * i],
+            positions[2 * next + 1] - positions[2 * i + 1]
+        ];
+
+        // Normalize the edge vectors
+        let prevEdgeLength = Math.sqrt(prevEdge[0] * prevEdge[0] + prevEdge[1] * prevEdge[1]);
+        let nextEdgeLength = Math.sqrt(nextEdge[0] * nextEdge[0] + nextEdge[1] * nextEdge[1]);
+        prevEdge = [prevEdge[0] / prevEdgeLength, prevEdge[1] / prevEdgeLength];
+        nextEdge = [nextEdge[0] / nextEdgeLength, nextEdge[1] / nextEdgeLength];
+
+        // Compute the normals by rotating the edge vectors 90 degrees counter-clockwise
+        let prevNormal = [-prevEdge[1], prevEdge[0]];
+        let nextNormal = [-nextEdge[1], nextEdge[0]];
+
+        // Add the normals to compute the miter vector
+        let miter = [prevNormal[0] + nextNormal[0], prevNormal[1] + nextNormal[1]];
+
+        // The miter length is inversely proportional to the cosine of half the angle between the normals
+        // It's multiplied by the sign of the cross product to get the direction (left/right)
+        let miterLength = Math.sign(prevNormal[0] * nextNormal[1] - prevNormal[1] * nextNormal[0]) / 
+            Math.sqrt(miter[0] * miter[0] + miter[1] * miter[1]) + epsilon;
+
+        normals[2 * i] = miter[0];
+        normals[2 * i + 1] = miter[1];
+        miters[i] = miterLength;
+    }
+
+    return { normals, miters };
+}
+
+let lineA = [0, 0];
+let lineB = [0, 0];
+let tangent = [0, 0];
+let miter = [0, 0];
+let count = 0;
+function calculateNormalsAndMiters(points, closed) 
+{
+    function addNext(out, normal, length) 
+    {
+        out.push([[normal[0], normal[1]], length])
+        return out
+    }
+    var curNormal = null
+    var out = []
+    if (closed) 
+    {
+        points = points.slice()
+        points.push(points[0])
+    }
+
+    var total = points.length
+    for (var i=1; i < total; i++) 
+    {
+        var last = points[i-1]
+        var cur = points[i]
+        var next = i < points.length-1 ? points[i+1] : null
+
+        lineA = direction(lineA, cur, last)
+        if (!curNormal)  
+        {
+            curNormal = [0, 0]
+            curNormal = normal(curNormal, lineA)
+        }
+
+        if (i === 1) //add initial normals
+        out = addNext(out, curNormal, 1)
+
+        if (!next) { //no miter, simple segment
+            curNormal = normal(curNormal, lineA) //reset normal
+            out = addNext(out, curNormal, 1)
+        } else { //miter with last
+            //get unit dir of next line
+            lineB = direction(lineB, next, cur)
+
+            //stores tangent & miter
+            var miterLen = computeMiter(tangent, miter, lineA, lineB, 1)
+            out = addNext(out, miter, miterLen)
+        }
+    }
+
+    //if the polyline is a closed loop, clean up the last normal
+    if (points.length > 2 && closed) 
+    {
+        var last2 = points[total-2]
+        var cur2 = points[0]
+        var next2 = points[1]
+
+        direction(lineA, cur2, last2)
+        direction(lineB, next2, cur2)
+        normal(curNormal, lineA)
+        
+        var miterLen2 = computeMiter(tangent, miter, lineA, lineB, 1)
+        out[0][0] = miter.slice()
+        out[total-1][0] = miter.slice()
+        out[0][1] = miterLen2
+        out[total-1][1] = miterLen2
+        out.pop()
+    }
+
+    return out
+}
 
 function drawArc(centerX, centerY, radius, startAngle, endAngle, numSegments) 
 {
     let angleStep = (endAngle - startAngle) / numSegments;
-    let positions = new Float32Array(2 * (numSegments + 1));
-    for (let i = 0; i <= numSegments; i++) 
-    {
+    let packedPositions = new Float32Array(2 * (numSegments + 1));    
+    let positions = [];
+    // Generate vertex positions for the arc
+    for (let i = 0; i <= numSegments; i++) {
         let angle = startAngle + i * angleStep;
-        let x = centerX + radius * Math.cos(angle);
-        let y = centerY + radius * Math.sin(angle);
-        positions[2*i] = x;
-        positions[2*i+1] = y;
+        positions.push([
+            centerX + radius * Math.cos(angle),
+            centerY + radius * Math.sin(angle)
+        ]);
     }
 
+    // Generate vertex positions for the arc
+    // for (let i = 0; i <= numSegments; i++) {
+    //     let angle = startAngle + i * angleStep;
+    //     packedPositions[2 * i] = centerX + radius * Math.cos(angle);
+    //     packedPositions[2 * i + 1] = centerY + radius * Math.sin(angle);
+    // }
+    path = [ 
+        [-1, -1], [1, -1], 
+        [1, 1], [-1, 1]
+    ]
+    let closed = true;
+    let tags = calculateNormalsAndMiters(path, closed);
+    if (closed) 
+    {
+        path = path.slice()
+        path.push(path[0])
+        tags.push(tags[0])
+    }
+
+    count = (path.length-1) * 6;
+    packedPositions = pack(path)
+
+
+    //let { normals, miters } = calculatePackedNormalsAndMiters(packedPositions);
+    let normals = tags.map(x => x[0]), miters = tags.map(x => x[1])
+
+    normals = pack(normals);
+    miters = pack(miters);
+
+    normals = new Float32Array(duplicate(normals))
+    miters = new Float32Array(duplicate(miters, true))
+    positions = new Float32Array(duplicate(packedPositions));
+    let indexUint16 = new Float32Array(createIndices(path.length));
+
+    console.log(positions, normals, miters)
+
+    console.log(gl.getError());
+
+    const positionBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+    const normalBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW);
+
+    const miterBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, miterBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, miters, gl.STATIC_DRAW);
+
+    const indexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexUint16, gl.STATIC_DRAW);
+
+    const a_positionLocation = gl.getAttribLocation(program, "a_position");
     gl.enableVertexAttribArray(a_positionLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
     gl.vertexAttribPointer(a_positionLocation, 2, gl.FLOAT, false, 0, 0);
-    gl.drawArrays(gl.LINE_STRIP, 0, numSegments + 1);
+
+    const a_normalLocation = gl.getAttribLocation(program, "a_normal");
+    gl.enableVertexAttribArray(a_normalLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+    gl.vertexAttribPointer(a_normalLocation, 2, gl.FLOAT, false, 0, 0);
+
+    const a_miterLocation = gl.getAttribLocation(program, "a_miter");
+    gl.enableVertexAttribArray(a_miterLocation);
+    gl.bindBuffer(gl.ARRAY_BUFFER, miterBuffer);
+    gl.vertexAttribPointer(a_miterLocation, 1, gl.FLOAT, false, 0, 0);
+
+    gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_SHORT, 0);
+
 }
 
 var percentage = 0;
@@ -255,7 +419,7 @@ function loading()
 
     let direction = settings.spinDirection;
 
-    for (let i = 0; i < settings.numberOfLines; i+=1)
+    for (let i = 0; i < 1; i++)
     {
         if (settings.spinDirection === 2) { direction = i % 2 === 0 ? 1 : -1; }
         if (settings.missEveryXLines > 0 && (i+1) % settings.missEveryXLines === 0) continue;
@@ -275,17 +439,16 @@ function loading()
                 endPoint = temp;
             }
 
-            gl.uniform2f(gl.getUniformLocation(program, "u_resolution"), gl.canvas.width, gl.canvas.height);
             gl.uniform4f(gl.getUniformLocation(program, "u_color"), colourWebGL[0], colourWebGL[1], colourWebGL[2], colourWebGL[3]);
+            gl.uniform1f(gl.getUniformLocation(program, "u_thickness"), 0.2);
 
             const segmentLength = 1;  
-            let numSegments = Math.ceil(100 / segmentLength);
+            let numSegments = Math.ceil(8 / segmentLength);
             drawArc(midScreen.x, midScreen.y, radius, startPoint, endPoint, numSegments);
         }
     }
     if (tick % framerate) { percentageEl.textContent = percentage.toFixed(0) + "%"; }
 }
-
 
 function getPositionOnShape(percentage, radius)
 {
@@ -364,53 +527,11 @@ let tick = 0;
 function animate()
 {
     gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.useProgram(program);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer1);
-
     loading();
-    
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer2);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    
-    let a_position = gl.getAttribLocation(blurProgram, "a_position");
-    let u_image = gl.getUniformLocation(blurProgram, "u_image");
-    let u_texSize = gl.getUniformLocation(blurProgram, "u_texSize");
-    
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        -1, -1,
-        1, -1,
-        -1, 1,
-        -1, 1,
-        1, -1,
-        1, 1
-    ]), gl.STATIC_DRAW);
-    
-    gl.useProgram(blurProgram); // add this line
-    gl.enableVertexAttribArray(a_position);
-    gl.vertexAttribPointer(a_position, 2, gl.FLOAT, false, 0, 0);
-    
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture1);
-    gl.uniform1i(u_image, 0);
-    gl.uniform2f(u_texSize, gl.canvas.width, gl.canvas.height);
-    
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    gl.blendFunc(gl.ONE, gl.ONE); // Additive blending
-    gl.enable(gl.BLEND);
-
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texture2);
-    gl.drawArrays(gl.TRIANGLES, 0, 6);
-
     tick++;
     requestAnimationFrame(animate);
 }
-animate();
+requestAnimationFrame(animate);
 
 
 function restart()
@@ -599,6 +720,177 @@ function gradientPresetChange()
 }
 document.getElementById("presets").addEventListener("input", (gradientPresetChange));
 
+
+// utility functions
 function interpolate(start, end, factor) { return start + (end - start) * factor; }
 function degreesToRadians(degrees) { return degrees * Math.PI / 180; }
 function euclideanDistance(x1, y1, x2, y2) { return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2)); }
+
+function createIdentity(size)
+{
+    let identity = new Float32Array(size * size);
+    for (let i = 0; i < size; i++) { identity[i * size + i] = 1; }
+    return identity;
+}
+
+function createGLBuffer(data, type, usage)
+{
+    let buffer = gl.createBuffer();
+    gl.bindBuffer(type, buffer);
+    gl.bufferData(type, data, usage);
+    return buffer;
+}
+
+// https://github.com/mattdesl/webgl-lines/blob/master/base/line-utils.js
+function duplicate(nestedArray, mirror) 
+{
+    var out = [];
+    nestedArray.forEach(x => 
+    {
+      let x1 = mirror ? -x : x;
+      out.push(x1, x);
+    });
+    return out;
+}
+  
+function createIndices(length) 
+{
+    let indices = new Uint16Array(length * 6);
+    let c = 0, index = 0;
+    for (let j = 0; j < length; j++) 
+    {
+      let i = index;
+      indices[c++] = i + 0;
+      indices[c++] = i + 1;
+      indices[c++] = i + 2;
+      indices[c++] = i + 2;
+      indices[c++] = i + 1;
+      indices[c++] = i + 3;
+      index += 2;
+    }
+    return indices;
+}
+
+// Vector2 functions - https://glmatrix.net/docs/vec2.js.html
+function add(out, a, b) { out[0] = a[0] + b[0]; out[1] = a[1] + b[1]; return out }
+function subtract(out, a, b) { 
+    out[0] = a[0] - b[0]; 
+    out[1] = a[1] - b[1]; 
+    return out;
+}
+function dot(a, b) { return a[0] * b[0] + a[1] * b[1] }
+function set(out, x, y) { out[0] = x; out[1] = y; return out }
+
+function normalise(out, a)
+{
+    var x = a[0],
+        y = a[1];
+    var len = x * x + y * y;
+    if (len > 0) {
+        len = 1 / Math.sqrt(len);
+    }
+    out[0] = a[0] * len;
+    out[1] = a[1] * len;
+    return out;
+
+}
+function computeMiter(tangent, miter, lineA, lineB, halfThick) 
+{
+    var tmp = [0, 0];
+    //get tangent line
+    tangent = add(tangent, lineA, lineB)
+    tangent = normalise(tangent, tangent)
+
+    //get miter as a unit vector
+    miter = set(miter, -tangent[1], tangent[0])
+    tmp = set(tmp, -lineA[1], lineA[0])
+
+    //get the necessary length of our miter
+    return halfThick / dot(miter, tmp)
+}
+
+function normal(out, dir) 
+{
+    out[0] = -dir[1];
+    out[1] = dir[0];
+    return out
+}
+
+function direction(out, a, b) 
+{
+    out = subtract(out, a, b)
+    out = normalise(out, out)
+    return out
+}
+
+// https://github.com/hughsk/array-pack-2d/blob/master/index.js
+function pack(arr, type) {
+    if (!arr[0] || !arr[0].length) {
+        return arr;
+    }
+
+    let Arr;
+    switch (type) {
+        case 'float32':
+            Arr = Float32Array;
+            break;
+        case 'float64':
+            Arr = Float64Array;
+            break;
+        case 'int8':
+            Arr = Int8Array;
+            break;
+        case 'int16':
+            Arr = Int16Array;
+            break;
+        case 'int32':
+            Arr = Int32Array;
+            break;
+        case 'uint8':
+            Arr = Uint8Array;
+            break;
+        case 'uint16':
+            Arr = Uint16Array;
+            break;
+        case 'uint32':
+            Arr = Uint32Array;
+            break;
+        default:
+            Arr = Array;
+    }
+
+    let dim = arr[0].length;
+    let out = new Arr(arr.length * dim);
+    let k = 0;
+
+    for (let i = 0; i < arr.length; i++) {
+        for (let j = 0; j < dim; j++) {
+            out[k++] = arr[i][j];
+        }
+    }
+
+    return out;
+}
+
+// https://github.com/stackgl/gl-mat4/blob/master/perspective.js
+function perspective(out, fovy, aspect, near, far) {
+    var f = 1.0 / Math.tan(fovy / 2),
+        nf = 1 / (near - far);
+    out[0] = f / aspect;
+    out[1] = 0;
+    out[2] = 0;
+    out[3] = 0;
+    out[4] = 0;
+    out[5] = f;
+    out[6] = 0;
+    out[7] = 0;
+    out[8] = 0;
+    out[9] = 0;
+    out[10] = (far + near) * nf;
+    out[11] = -1;
+    out[12] = 0;
+    out[13] = 0;
+    out[14] = (2 * far * near) * nf;
+    out[15] = 0;
+    return out;
+};
